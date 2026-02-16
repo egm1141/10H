@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ders Paylaşım Platformu - Firebase Storage</title>
+    <title>Ders Paylaşım Platformu</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
     
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
         
         // Firebase configuration
         const firebaseConfig = {
@@ -26,13 +25,10 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app);
         
         // Make Firebase available globally
         window.db = db;
-        window.storage = storage;
         window.firestore = { collection, addDoc, getDocs, deleteDoc, doc, onSnapshot, query, orderBy };
-        window.firebaseStorage = { ref, uploadBytes, getDownloadURL, deleteObject };
     </script>
     
     <style>
@@ -308,12 +304,6 @@
         .btn-upload:hover {
             transform: translateY(-2px);
             box-shadow: var(--shadow-lg);
-        }
-
-        .btn-upload:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
         }
 
         /* Posts Grid */
@@ -827,9 +817,6 @@
                                 </label>
                             </div>
                             <span id="fileName" style="font-size: 0.85rem; color: var(--text-secondary);"></span>
-                            <span style="font-size: 0.75rem; color: var(--success); margin-top: 0.25rem; display: block;">
-                                ✨ Yeni: Görseller artık Firebase Storage'da saklanıyor!
-                            </span>
                         </div>
                         <button type="submit" class="btn btn-upload">Paylaş</button>
                     </form>
@@ -988,7 +975,7 @@
                     ...doc.data()
                 }));
             } catch (error) {
-                console.error('Post'ları getirme hatası:', error);
+                console.error('Error getting posts:', error);
                 return [];
             }
         }
@@ -1001,131 +988,21 @@
         async function savePost(post) {
             try {
                 const postsCol = window.firestore.collection(window.db, 'posts');
-                const docRef = await window.firestore.addDoc(postsCol, post);
-                console.log('Post kaydedildi, ID:', docRef.id);
-                return docRef;
+                await window.firestore.addDoc(postsCol, post);
             } catch (error) {
-                console.error('Post kaydetme hatası:', error);
-                if (error.code === 'permission-denied') {
-                    throw new Error('Yetki hatası! Firebase ayarlarını kontrol edin.');
-                } else if (error.code === 'resource-exhausted') {
-                    throw new Error('Görsel çok büyük! Lütfen daha küçük bir görsel kullanın.');
-                } else {
-                    throw new Error('Veritabanı hatası: ' + error.message);
-                }
+                console.error('Error saving post:', error);
+                alert('❌ Gönderi kaydedilirken hata oluştu!');
             }
         }
 
-        // ✨ YENİ: Firebase Storage'dan görseli sil
-        async function deleteImageFromStorage(imagePath) {
-            try {
-                if (!imagePath) return;
-                
-                const imageRef = window.firebaseStorage.ref(window.storage, imagePath);
-                await window.firebaseStorage.deleteObject(imageRef);
-                console.log('✅ Görsel Firebase Storage\'dan silindi:', imagePath);
-            } catch (error) {
-                console.error('❌ Görsel silme hatası:', error);
-                // Hata olsa bile devam et, çünkü belki görsel zaten silinmiştir
-            }
-        }
-
-        // ✨ GÜNCELLENMIŞ: Hem Firestore'dan hem Storage'dan sil
         async function deletePostFromFirestore(firestoreId) {
             try {
-                // 1. Önce post verilerini al (imagePath için)
-                const postsCol = window.firestore.collection(window.db, 'posts');
                 const postDoc = window.firestore.doc(window.db, 'posts', firestoreId);
-                const postSnapshot = await window.firestore.getDocs(window.firestore.query(postsCol));
-                const post = postSnapshot.docs.find(doc => doc.id === firestoreId)?.data();
-                
-                // 2. Storage'dan görseli sil
-                if (post && post.imagePath) {
-                    await deleteImageFromStorage(post.imagePath);
-                }
-                
-                // 3. Firestore'dan post'u sil
                 await window.firestore.deleteDoc(postDoc);
-                console.log('✅ Post Firestore\'dan silindi');
             } catch (error) {
-                console.error('❌ Post silme hatası:', error);
+                console.error('Error deleting post:', error);
                 alert('❌ Gönderi silinirken hata oluştu!');
             }
-        }
-
-        // ✨ YENİ: Firebase Storage'a görsel yükle
-        async function uploadImageToStorage(file, postId) {
-            try {
-                // Benzersiz dosya adı oluştur
-                const fileName = `${postId}_${Date.now()}_${file.name}`;
-                const imagePath = `posts/${currentUser.username}/${fileName}`;
-                
-                // Storage reference oluştur
-                const storageRef = window.firebaseStorage.ref(window.storage, imagePath);
-                
-                // Dosyayı yükle
-                await window.firebaseStorage.uploadBytes(storageRef, file);
-                
-                // Download URL al
-                const downloadURL = await window.firebaseStorage.getDownloadURL(storageRef);
-                
-                console.log('✅ Görsel yüklendi:', downloadURL);
-                return { downloadURL, imagePath };
-            } catch (error) {
-                console.error('❌ Görsel yükleme hatası:', error);
-                throw new Error('Görsel yüklenirken hata oluştu: ' + error.message);
-            }
-        }
-
-        // Image compression function
-        function compressImage(file, maxWidth, quality, callback) {
-            const reader = new FileReader();
-            
-            reader.onerror = function() {
-                console.error('Dosya okuma hatası');
-                callback(null);
-            };
-            
-            reader.onload = function(event) {
-                const img = new Image();
-                
-                img.onerror = function() {
-                    console.error('Görsel yükleme hatası');
-                    callback(null);
-                };
-                
-                img.onload = function() {
-                    try {
-                        const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
-
-                        // Yeni boyutları hesapla
-                        if (width > maxWidth) {
-                            height = (height * maxWidth) / width;
-                            width = maxWidth;
-                        }
-
-                        canvas.width = width;
-                        canvas.height = height;
-
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-
-                        // Blob olarak çıkar (Firebase Storage için)
-                        canvas.toBlob(function(blob) {
-                            callback(blob);
-                        }, 'image/jpeg', quality);
-                    } catch (error) {
-                        console.error('Sıkıştırma hatası:', error);
-                        callback(null);
-                    }
-                };
-
-                img.src = event.target.result;
-            };
-
-            reader.readAsDataURL(file);
         }
 
         // Auth functions
@@ -1134,36 +1011,38 @@
             const tabs = document.querySelectorAll('.login-tab');
             tabs.forEach(tab => tab.classList.remove('active'));
             
-            if (mode === 'login') {
-                tabs[0].classList.add('active');
-            } else {
-                tabs[1].classList.add('active');
-            }
+            // Find and activate the clicked tab
+            tabs.forEach(tab => {
+                if ((mode === 'login' && tab.textContent === 'Giriş Yap') || 
+                    (mode === 'register' && tab.textContent === 'Kayıt Ol')) {
+                    tab.classList.add('active');
+                }
+            });
             
             const submitBtn = document.getElementById('authSubmitBtn');
             submitBtn.textContent = mode === 'login' ? 'Giriş Yap' : 'Kayıt Ol';
         }
 
-        // ✅ DÜZELTİLDİ: Auth form submit handler
         document.getElementById('authForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const username = document.getElementById('authUsername').value.trim();
             const password = document.getElementById('authPassword').value;
 
             if (!username || !password) {
-                alert('❌ Lütfen tüm alanları doldurun!');
+                alert('Lütfen tüm alanları doldurun!');
                 return;
             }
 
             const users = getUsers();
 
             if (authMode === 'register') {
-                // Kayıt işlemi
+                // Check if username exists
                 if (users.find(u => u.username === username)) {
-                    alert('❌ Bu kullanıcı adı zaten kullanılıyor!');
+                    alert('Bu kullanıcı adı zaten kullanılıyor!');
                     return;
                 }
 
+                // Create new user
                 users.push({
                     username: username,
                     password: password,
@@ -1172,14 +1051,15 @@
                 saveUsers(users);
                 alert('✅ Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
                 
-                // Formu temizle
+                // Switch to login tab
+                authMode = 'login';
+                const tabs = document.querySelectorAll('.login-tab');
+                tabs.forEach(tab => tab.classList.remove('active'));
+                tabs[0].classList.add('active');
+                document.getElementById('authSubmitBtn').textContent = 'Giriş Yap';
                 document.getElementById('authForm').reset();
-                
-                // Giriş moduna geç
-                switchAuthTab('login');
-                
             } else {
-                // Giriş işlemi
+                // Login
                 const user = users.find(u => u.username === username && u.password === password);
                 if (user) {
                     currentUser = user;
@@ -1188,8 +1068,6 @@
                     document.getElementById('userInfo').style.display = 'flex';
                     const isAdmin = username === 'Egm1141' || username === 'Omrr1311';
                     document.getElementById('currentUserName').textContent = username + (isAdmin ? ' 👑' : '');
-                    
-                    // Sayfa içeriğini yükle
                     loadSubjects();
                     loadPosts();
                     updateLeaderboard();
@@ -1201,16 +1079,13 @@
 
         function logout() {
             if (postsListener) {
-                postsListener();
+                postsListener(); // Unsubscribe from real-time updates
             }
             currentUser = null;
             document.getElementById('authModal').classList.add('active');
             document.getElementById('mainContent').style.display = 'none';
             document.getElementById('userInfo').style.display = 'none';
             document.getElementById('authForm').reset();
-            
-            // Giriş moduna geri dön
-            switchAuthTab('login');
         }
 
         // Class selection
@@ -1258,7 +1133,7 @@
             document.getElementById('fileName').textContent = fileName ? `Seçili: ${fileName}` : '';
         });
 
-        // ✨ GÜNCELLENMIŞ: Firebase Storage ile yükleme
+        // Upload post
         document.getElementById('uploadForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -1271,79 +1146,39 @@
                 return;
             }
 
-            if (!imageFile.type.startsWith('image/')) {
-                alert('❌ Lütfen geçerli bir görsel dosyası seçin!');
-                return;
-            }
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                const newPost = {
+                    id: Date.now(),
+                    title: title,
+                    description: description,
+                    image: event.target.result,
+                    author: currentUser.username,
+                    class: currentClass,
+                    subject: currentSubject,
+                    createdAt: new Date().toISOString()
+                };
 
-            // Yükleme başladı
-            const submitBtn = e.target.querySelector('.btn-upload');
-            const originalBtnText = submitBtn.textContent;
-            submitBtn.textContent = '⏳ Yükleniyor...';
-            submitBtn.disabled = true;
+                await savePost(newPost);
+                
+                // Reset form
+                document.getElementById('uploadForm').reset();
+                document.getElementById('fileName').textContent = '';
+                
+                alert('✅ Konu anlatımınız başarıyla paylaşıldı!');
+                // Posts will auto-update via listener
+            };
 
-            // Sıkıştır ve yükle
-            compressImage(imageFile, 1200, 0.85, async function(compressedBlob) {
-                if (!compressedBlob) {
-                    alert('❌ Görsel işlenirken hata oluştu!');
-                    submitBtn.textContent = originalBtnText;
-                    submitBtn.disabled = false;
-                    return;
-                }
-
-                // Dosya boyutunu kontrol et (5MB limit)
-                const sizeInMB = compressedBlob.size / (1024 * 1024);
-                if (sizeInMB > 5) {
-                    alert('❌ Görsel çok büyük! Lütfen 5MB\'dan küçük bir görsel kullanın.');
-                    submitBtn.textContent = originalBtnText;
-                    submitBtn.disabled = false;
-                    return;
-                }
-
-                try {
-                    const postId = Date.now();
-                    
-                    // Firebase Storage'a yükle
-                    submitBtn.textContent = '📤 Storage\'a yükleniyor...';
-                    const { downloadURL, imagePath } = await uploadImageToStorage(compressedBlob, postId);
-                    
-                    // Firestore'a kaydet
-                    submitBtn.textContent = '💾 Kaydediliyor...';
-                    const newPost = {
-                        id: postId,
-                        title: title,
-                        description: description,
-                        imageUrl: downloadURL,  // Storage URL
-                        imagePath: imagePath,   // Silmek için gerekli
-                        author: currentUser.username,
-                        class: currentClass,
-                        subject: currentSubject,
-                        createdAt: new Date().toISOString()
-                    };
-
-                    await savePost(newPost);
-                    
-                    // Formu temizle
-                    document.getElementById('uploadForm').reset();
-                    document.getElementById('fileName').textContent = '';
-                    
-                    alert('✅ Konu anlatımınız başarıyla paylaşıldı!');
-                } catch (error) {
-                    console.error('Yükleme hatası:', error);
-                    alert('❌ Yükleme sırasında hata oluştu: ' + error.message);
-                } finally {
-                    submitBtn.textContent = originalBtnText;
-                    submitBtn.disabled = false;
-                }
-            });
+            reader.readAsDataURL(imageFile);
         });
 
-        // Load posts
+        // Load posts - UPDATED TO SHOW ALL POSTS WITH FIREBASE
         async function loadPosts() {
             const container = document.getElementById('postsSection');
             
+            // Setup real-time listener
             if (postsListener) {
-                postsListener();
+                postsListener(); // Unsubscribe previous listener
             }
             
             const postsCol = window.firestore.collection(window.db, 'posts');
@@ -1355,6 +1190,7 @@
                     ...doc.data()
                 }));
                 
+                // Filter by selected class and subject
                 posts = posts.filter(p => p.class === currentClass && p.subject === currentSubject);
 
                 if (posts.length === 0) {
@@ -1368,11 +1204,7 @@
                     return;
                 }
 
-                container.innerHTML = posts.map(post => {
-                    // Eski base64 görselleri veya yeni Storage URL'lerini destekle
-                    const imageUrl = post.imageUrl || post.image;
-                    
-                    return `
+                container.innerHTML = posts.map(post => `
                     <div class="post-card">
                         <div class="post-header">
                             <div class="post-author">
@@ -1399,15 +1231,15 @@
                                 </div>
                             ` : ''}
                         </div>
-                        <img src="${imageUrl}" alt="${post.title}" class="post-image" onclick="openImageModal('${imageUrl}')">
+                        <img src="${post.image}" alt="${post.title}" class="post-image" onclick="openImageModal('${post.image}')">
                         <div class="post-content">
                             <h3 class="post-title">${post.title}</h3>
                             ${post.description ? `<p class="post-description">${post.description}</p>` : ''}
                         </div>
                     </div>
-                `;
-                }).join('');
+                `).join('');
                 
+                // Update leaderboard when posts change
                 updateLeaderboard();
             });
         }
@@ -1419,9 +1251,10 @@
                 return;
             }
 
-            if (confirm('Bu gönderiyi silmek istediğinize emin misiniz? Görsel de Firebase Storage\'dan silinecek!')) {
+            if (confirm('Bu gönderiyi silmek istediğinize emin misiniz?')) {
                 await deletePostFromFirestore(firestoreId);
-                alert('✅ Gönderi ve görseli silindi!');
+                alert('✅ Gönderi silindi!');
+                // Posts will auto-update via listener
             }
         }
 
@@ -1430,11 +1263,13 @@
             const container = document.getElementById('leaderboardContent');
             const posts = await getPosts();
             
+            // Count posts per user
             const userCounts = {};
             posts.forEach(post => {
                 userCounts[post.author] = (userCounts[post.author] || 0) + 1;
             });
 
+            // Sort by count
             const leaderboard = Object.entries(userCounts)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 10);
@@ -1483,6 +1318,7 @@
         }
 
         function switchModTab(tabName) {
+            // Hide all tabs
             document.querySelectorAll('.mod-tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
@@ -1490,8 +1326,10 @@
                 btn.classList.remove('active');
             });
 
+            // Show selected tab
             document.getElementById('mod' + tabName.charAt(0).toUpperCase() + tabName.slice(1) + 'Tab').classList.add('active');
             
+            // Activate button
             const buttons = document.querySelectorAll('.mod-tab');
             buttons.forEach(btn => {
                 if (btn.textContent.toLowerCase().includes(tabName === 'posts' ? 'gönderi' : tabName === 'users' ? 'kullanıcı' : 'istatistik')) {
@@ -1529,11 +1367,9 @@
                 return;
             }
 
-            container.innerHTML = posts.map(post => {
-                const imageUrl = post.imageUrl || post.image;
-                return `
+            container.innerHTML = posts.map(post => `
                 <div class="mod-post-item">
-                    <img src="${imageUrl}" class="mod-post-thumbnail" onclick="openImageModal('${imageUrl}')" alt="${post.title}">
+                    <img src="${post.image}" class="mod-post-thumbnail" onclick="openImageModal('${post.image}')" alt="${post.title}">
                     <div class="mod-post-info">
                         <div class="mod-post-title">${post.title}</div>
                         <div class="mod-post-meta">
@@ -1544,19 +1380,19 @@
                         ${post.description ? `<div style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">${post.description}</div>` : ''}
                         <div class="mod-post-actions" style="margin-top: 1rem;">
                             <button class="btn btn-danger btn-sm" onclick="deletePostMod('${post.firestoreId}')">🗑️ Sil</button>
-                            <button class="btn btn-primary btn-sm" onclick="openImageModal('${imageUrl}')">👁️ Görüntüle</button>
+                            <button class="btn btn-primary btn-sm" onclick="openImageModal('${post.image}')">👁️ Görüntüle</button>
                         </div>
                     </div>
                 </div>
-            `;
-            }).join('');
+            `).join('');
         }
 
         async function deletePostMod(firestoreId) {
-            if (confirm('Bu gönderiyi silmek istediğinize emin misiniz? Görsel de Firebase Storage\'dan silinecek!')) {
+            if (confirm('Bu gönderiyi silmek istediğinize emin misiniz?')) {
                 await deletePostFromFirestore(firestoreId);
                 loadModPosts();
-                alert('✅ Gönderi ve görseli silindi!');
+                alert('✅ Gönderi silindi!');
+                // Posts will auto-update via listener
             }
         }
 
@@ -1579,7 +1415,7 @@
                             <div>
                                 <div style="font-weight: 600;">
                                     ${user.username}
-                                    ${(user.username === 'Egm1141' || user.username === 'Omrr1311') ? '<span class="admin-badge">ADMIN</span>' : ''}
+                                    ${user.username === 'Egm1141' ? '<span class="admin-badge">ADMIN</span>' : ''}
                                 </div>
                                 <div style="font-size: 0.85rem; color: var(--text-secondary);">
                                     📅 Kayıt: ${new Date(user.registeredAt).toLocaleDateString('tr-TR')} | 
@@ -1587,7 +1423,7 @@
                                 </div>
                             </div>
                         </div>
-                        ${(user.username !== 'Egm1141' && user.username !== 'Omrr1311' && (currentUser.username === 'Egm1141' || currentUser.username === 'Omrr1311')) ? `
+                        ${user.username !== 'Egm1141' && currentUser.username === 'Egm1141' ? `
                             <button class="btn btn-danger btn-sm" onclick="deleteUser('${user.username}')">🗑️ Kullanıcıyı Sil</button>
                         ` : ''}
                     </div>
@@ -1596,16 +1432,18 @@
         }
 
         async function deleteUser(username) {
-            if (username === 'Egm1141' || username === 'Omrr1311') {
+            if (username === 'Egm1141') {
                 alert('❌ Admin kullanıcısı silinemez!');
                 return;
             }
 
             if (confirm(`"${username}" kullanıcısını ve tüm gönderilerini silmek istediğinize emin misiniz?`)) {
+                // Delete user
                 let users = getUsers();
                 users = users.filter(u => u.username !== username);
                 saveUsers(users);
 
+                // Delete user's posts from Firestore
                 const posts = await getPosts();
                 const userPosts = posts.filter(p => p.author === username);
                 for (const post of userPosts) {
@@ -1613,7 +1451,7 @@
                 }
 
                 loadModUsers();
-                alert('✅ Kullanıcı ve tüm gönderileri (görseller dahil) silindi!');
+                alert('✅ Kullanıcı ve gönderileri silindi!');
             }
         }
 
