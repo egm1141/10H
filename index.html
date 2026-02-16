@@ -1134,32 +1134,33 @@
             const tabs = document.querySelectorAll('.login-tab');
             tabs.forEach(tab => tab.classList.remove('active'));
             
-            tabs.forEach(tab => {
-                if ((mode === 'login' && tab.textContent === 'Giriş Yap') || 
-                    (mode === 'register' && tab.textContent === 'Kayıt Ol')) {
-                    tab.classList.add('active');
-                }
-            });
+            if (mode === 'login') {
+                tabs[0].classList.add('active');
+            } else {
+                tabs[1].classList.add('active');
+            }
             
             const submitBtn = document.getElementById('authSubmitBtn');
             submitBtn.textContent = mode === 'login' ? 'Giriş Yap' : 'Kayıt Ol';
         }
 
+        // ✅ DÜZELTİLDİ: Auth form submit handler
         document.getElementById('authForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const username = document.getElementById('authUsername').value.trim();
             const password = document.getElementById('authPassword').value;
 
             if (!username || !password) {
-                alert('Lütfen tüm alanları doldurun!');
+                alert('❌ Lütfen tüm alanları doldurun!');
                 return;
             }
 
             const users = getUsers();
 
             if (authMode === 'register') {
+                // Kayıt işlemi
                 if (users.find(u => u.username === username)) {
-                    alert('Bu kullanıcı adı zaten kullanılıyor!');
+                    alert('❌ Bu kullanıcı adı zaten kullanılıyor!');
                     return;
                 }
 
@@ -1171,13 +1172,14 @@
                 saveUsers(users);
                 alert('✅ Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
                 
-                authMode = 'login';
-                const tabs = document.querySelectorAll('.login-tab');
-                tabs.forEach(tab => tab.classList.remove('active'));
-                tabs[0].classList.add('active');
-                document.getElementById('authSubmitBtn').textContent = 'Giriş Yap';
+                // Formu temizle
                 document.getElementById('authForm').reset();
+                
+                // Giriş moduna geç
+                switchAuthTab('login');
+                
             } else {
+                // Giriş işlemi
                 const user = users.find(u => u.username === username && u.password === password);
                 if (user) {
                     currentUser = user;
@@ -1186,6 +1188,8 @@
                     document.getElementById('userInfo').style.display = 'flex';
                     const isAdmin = username === 'Egm1141' || username === 'Omrr1311';
                     document.getElementById('currentUserName').textContent = username + (isAdmin ? ' 👑' : '');
+                    
+                    // Sayfa içeriğini yükle
                     loadSubjects();
                     loadPosts();
                     updateLeaderboard();
@@ -1204,6 +1208,9 @@
             document.getElementById('mainContent').style.display = 'none';
             document.getElementById('userInfo').style.display = 'none';
             document.getElementById('authForm').reset();
+            
+            // Giriş moduna geri dön
+            switchAuthTab('login');
         }
 
         // Class selection
@@ -1695,5 +1702,3 @@
     </script>
 </body>
 </html>
-
-
