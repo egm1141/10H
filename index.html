@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ders Paylaşım Platformu</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
-    
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>10-H Sınıfı | 2025-2026 Hatıra Kasası</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        
-        // Firebase configuration
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
         const firebaseConfig = {
             apiKey: "AIzaSyDVC44SWG6p9e0F2JNWc66zMJJTXO7TF98",
             authDomain: "konu-anlat.firebaseapp.com",
@@ -21,1522 +24,587 @@
             appId: "1:283509599639:web:05578aa68fea8243d8a8d2",
             measurementId: "G-E0SZZ0M7WD"
         };
-        
-        // Initialize Firebase
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        
-        // Make Firebase available globally
-        window.db = db;
-        window.firestore = { collection, addDoc, getDocs, deleteDoc, doc, onSnapshot, query, orderBy };
+        const storage = getStorage(app);
+
+        window.fb = { db, storage, collection, addDoc, onSnapshot, query, orderBy, ref, uploadBytesResumable, getDownloadURL };
     </script>
-    
+
     <style>
         :root {
-            --primary: #667eea;
-            --secondary: #764ba2;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --bg-primary: #f8fafc;
-            --bg-secondary: #ffffff;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --border: #e2e8f0;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+            --bg: #050510;
+            --accent: #fcd34d;
+            --accent-glow: rgba(252, 211, 77, 0.3);
+            --secondary: #8b5cf6;
+            --secondary-glow: rgba(139, 92, 246, 0.2);
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
         }
 
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* Header */
-        header {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 1.5rem 5%;
-            box-shadow: var(--shadow-lg);
-            position: sticky;
-            top: 0;
+        .bg-mesh {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: radial-gradient(circle at 10% 20%, var(--secondary-glow) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, var(--accent-glow) 0%, transparent 40%);
+        }
+
+        .app {
+            width: 100%;
+            max-width: 1200px;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        /* Auth Screen Styles */
+        #login-screen {
+            position: fixed;
+            inset: 0;
             z-index: 1000;
-        }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
+            background: var(--bg);
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
 
-        .logo {
-            font-family: 'Quicksand', sans-serif;
-            font-size: 1.8rem;
+        .login-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(40px);
+            padding: 50px 30px;
+            border-radius: 40px;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+        }
+
+        .login-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 30px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            text-align: left;
+        }
+
+        .login-row label {
+            font-size: 13px;
             font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            color: var(--muted);
+            margin-left: 5px;
+            margin-bottom: 5px;
+            display: block;
         }
 
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+        .login-row input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            padding: 16px;
+            border-radius: 18px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 15px;
+            outline: none;
         }
 
-        .user-name {
-            font-weight: 600;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
+        .login-row input:focus {
+            border-color: var(--accent);
         }
 
-        .btn {
-            padding: 0.6rem 1.5rem;
+        .btn-login {
+            background: var(--accent);
+            color: #000;
+            font-weight: 800;
+            font-size: 17px;
+            padding: 16px;
+            border-radius: 18px;
             border: none;
-            border-radius: 8px;
-            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Poppins', sans-serif;
-            font-size: 0.9rem;
+            margin-top: 15px;
+            transition: 0.3s;
+            box-shadow: 0 10px 20px var(--accent-glow);
         }
 
-        .btn-primary {
-            background: white;
-            color: var(--primary);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
-        /* Main Container */
-        .container {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 5%;
-        }
-
-        /* Class Selector */
-        .class-selector {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .class-btn {
-            padding: 1rem 2rem;
-            background: white;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .class-btn:hover {
-            border-color: var(--primary);
+        .btn-login:hover {
             transform: translateY(-3px);
-            box-shadow: var(--shadow);
+            box-shadow: 0 15px 30px var(--accent-glow);
         }
 
-        .class-btn.active {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border-color: transparent;
+        /* Main App Header */
+        header {
+            margin-bottom: 60px;
+            animation: fadeInDown 1s ease-out;
         }
 
-        /* Subject Tabs */
-        .subject-tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-            background: white;
-            padding: 1rem;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(38px, 8vw, 82px);
+            font-weight: 800;
+            letter-spacing: -2px;
+            line-height: 1.1;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .subject-tab {
-            padding: 0.8rem 1.5rem;
-            background: var(--bg-primary);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-
-        .subject-tab:hover {
-            background: var(--primary);
-            color: white;
-        }
-
-        .subject-tab.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        /* Content Grid */
-        .content-grid {
-            display: grid;
-            grid-template-columns: 3fr 1fr;
-            gap: 2rem;
-        }
-
-        /* Upload Section */
-        .upload-section {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            margin-bottom: 2rem;
-        }
-
-        .upload-title {
-            font-size: 1.3rem;
+        .subtitle {
+            font-size: 16px;
+            color: var(--accent);
+            letter-spacing: 3px;
             font-weight: 700;
-            margin-bottom: 1.5rem;
-            color: var(--primary);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        /* Countdown */
+        .timer {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 25px 0;
+        }
+
+        .time-box {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            border-radius: 20px;
+            min-width: 85px;
+        }
+
+        .time-val {
+            display: block;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .time-label {
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Vault & Form */
+        .vault-container {
+            max-width: 650px;
+            width: 100%;
+            margin: 40px auto;
+            position: relative;
+        }
+
+        .vault-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(30px);
+            padding: 40px;
+            border-radius: 40px;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);
+            text-align: left;
         }
 
         .upload-form {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 15px;
         }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .form-group label {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .form-group input,
-        .form-group textarea {
-            padding: 0.8rem;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            font-family: 'Poppins', sans-serif;
-            transition: all 0.3s ease;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
+        .form-row input,
+        .form-row textarea {
             width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            padding: 14px;
+            border-radius: 15px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 14px;
         }
 
-        .file-input-wrapper input[type=file] {
-            position: absolute;
-            left: -9999px;
-        }
-
-        .file-input-label {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 1rem;
-            background: var(--bg-primary);
+        .file-upload-box {
             border: 2px dashed var(--border);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-
-        .file-input-label:hover {
-            border-color: var(--primary);
-            background: rgba(102, 126, 234, 0.1);
-            color: var(--primary);
-        }
-
-        .btn-upload {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 1rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-upload:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        /* Posts Grid */
-        .posts-section {
-            display: grid;
-            gap: 1.5rem;
-        }
-
-        .post-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            transition: all 0.3s ease;
-        }
-
-        .post-card:hover {
-            box-shadow: var(--shadow-lg);
-            transform: translateY(-3px);
-        }
-
-        .post-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .post-author {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .author-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-        }
-
-        .author-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .author-name {
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .post-date {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .post-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .btn-sm {
-            padding: 0.4rem 0.8rem;
-            font-size: 0.85rem;
-        }
-
-        .post-image {
-            width: 100%;
-            max-height: 500px;
-            object-fit: contain;
-            background: var(--bg-primary);
-            cursor: pointer;
-        }
-
-        .post-content {
-            padding: 1.5rem;
-        }
-
-        .post-title {
-            font-weight: 700;
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
-
-        .post-description {
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        /* Leaderboard */
-        .leaderboard {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 100px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .leaderboard-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .leaderboard-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .leaderboard-item:hover {
-            background: var(--bg-primary);
-        }
-
-        .rank {
-            font-weight: 700;
-            font-size: 1.2rem;
-            width: 30px;
-            text-align: center;
-        }
-
-        .rank-1 { color: #fbbf24; }
-        .rank-2 { color: #94a3b8; }
-        .rank-3 { color: #cd7f32; }
-
-        .leader-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-        }
-
-        .leader-info {
-            flex: 1;
-        }
-
-        .leader-name {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .leader-score {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .score-badge {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 0.3rem 0.8rem;
+            padding: 30px;
             border-radius: 20px;
-            font-weight: 700;
-            font-size: 0.9rem;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
         }
 
-        /* Modal */
-        .modal {
+        .file-upload-box:hover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .btn-submit {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 16px;
+            border-radius: 15px;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* Progress Bar */
+        .prog-wrap {
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
+            margin-top: 15px;
+        }
+
+        .prog-bg {
             width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .prog-fill {
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            padding: 2rem;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.3s;
         }
 
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 12px;
-            max-width: 500px;
+        /* Gallery */
+        #unlocked-section {
+            display: none;
             width: 100%;
-            padding: 2rem;
-            position: relative;
-            animation: modalSlideIn 0.3s ease-out;
+            animation: fadeInUp 1s ease forwards;
         }
 
-        @keyframes modalSlideIn {
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .memory-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            overflow: hidden;
+            text-align: left;
+            transition: 0.3s;
+        }
+
+        .memory-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent);
+        }
+
+        .memory-img {
+            width: 100%;
+            aspect-ratio: 4/5;
+            object-fit: cover;
+            background: #161b22;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-name {
+            font-weight: 800;
+            font-size: 18px;
+            color: var(--accent);
+            margin-bottom: 5px;
+        }
+
+        .card-note {
+            font-size: 14px;
+            color: var(--text);
+            opacity: 0.8;
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        @keyframes fadeInDown {
             from {
                 opacity: 0;
-                transform: translateY(-50px);
+                transform: translateY(-30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
 
-        .modal-close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-secondary);
-            transition: all 0.3s ease;
-        }
-
-        .modal-close:hover {
-            color: var(--danger);
-            transform: rotate(90deg);
-        }
-
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            color: var(--primary);
-        }
-
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .login-tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .login-tab {
-            flex: 1;
-            padding: 0.8rem;
-            background: var(--bg-primary);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .login-tab.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .image-modal-content {
-            max-width: 90vw;
-            max-height: 90vh;
-            padding: 0;
-            background: transparent;
-        }
-
-        .modal-image {
-            width: 100%;
-            height: auto;
-            border-radius: 12px;
-        }
-
-        /* Admin Panel */
-        .admin-badge {
-            background: var(--warning);
-            color: white;
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-        }
-
-        /* Moderator Panel */
-        .mod-tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-            border-bottom: 2px solid var(--border);
-        }
-
-        .mod-tab {
-            padding: 1rem 2rem;
-            background: transparent;
-            border: none;
-            border-bottom: 3px solid transparent;
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--text-secondary);
-            transition: all 0.3s ease;
-        }
-
-        .mod-tab:hover {
-            color: var(--primary);
-        }
-
-        .mod-tab.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-        }
-
-        .mod-tab-content {
-            display: none;
-        }
-
-        .mod-tab-content.active {
-            display: block;
-        }
-
-        .mod-section {
-            background: var(--bg-primary);
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-        }
-
-        .mod-section h3 {
-            color: var(--primary);
-            margin-bottom: 1rem;
-            font-size: 1.3rem;
-        }
-
-        .filter-section {
-            margin-bottom: 1rem;
-        }
-
-        .mod-post-item {
-            background: white;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            display: flex;
-            gap: 1rem;
-            align-items: flex-start;
-            border-left: 4px solid var(--primary);
-        }
-
-        .mod-post-thumbnail {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .mod-post-info {
-            flex: 1;
-        }
-
-        .mod-post-title {
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .mod-post-meta {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-        }
-
-        .mod-post-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .user-item {
-            background: white;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .user-item-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .stat-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: var(--text-secondary);
-        }
-
-        .empty-state-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-
-        /* Responsive */
-        @media (max-width: 968px) {
-            .content-grid {
-                grid-template-columns: 1fr;
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
             }
 
-            .leaderboard {
-                position: relative;
-                top: 0;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .class-selector {
-                flex-direction: column;
-            }
-
-            .class-btn {
-                width: 100%;
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
     </style>
 </head>
+
 <body>
-    <!-- Header -->
-    <header>
-        <div class="header-content">
-            <div class="logo">
-                📚 Ders Paylaşım Platformu
-            </div>
-            <div class="user-info" id="userInfo" style="display: none;">
-                <button class="btn btn-primary btn-sm" onclick="openModPanel()" style="margin-right: 1rem;">⚙️ Moderatör Paneli</button>
-                <span class="user-name" id="currentUserName"></span>
-                <button class="btn btn-danger btn-sm" onclick="logout()">Çıkış</button>
-            </div>
-        </div>
-    </header>
+    <div class="bg-mesh"></div>
 
-    <!-- Main Container -->
-    <div class="container" id="mainContent" style="display: none;">
-        <!-- Class Selector -->
-        <div class="class-selector">
-            <button class="class-btn active" onclick="selectClass(9)">9. Sınıf</button>
-            <button class="class-btn" onclick="selectClass(10)">10. Sınıf</button>
-            <button class="class-btn" onclick="selectClass(11)">11. Sınıf</button>
-            <button class="class-btn" onclick="selectClass(12)">12. Sınıf</button>
-        </div>
-
-        <!-- Subject Tabs -->
-        <div class="subject-tabs" id="subjectTabs"></div>
-
-        <!-- Content Grid -->
-        <div class="content-grid">
-            <!-- Main Content -->
-            <div>
-                <!-- Upload Section -->
-                <div class="upload-section">
-                    <h2 class="upload-title">📤 Yeni Konu Anlatımı Paylaş</h2>
-                    <form class="upload-form" id="uploadForm">
-                        <div class="form-group">
-                            <label>Başlık</label>
-                            <input type="text" id="postTitle" placeholder="Örn: Türev Formülleri" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Açıklama (Opsiyonel)</label>
-                            <textarea id="postDescription" rows="3" placeholder="Konu hakkında kısa açıklama..."></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Konu Anlatımı Görseli</label>
-                            <div class="file-input-wrapper">
-                                <input type="file" id="postImage" accept="image/*" required>
-                                <label for="postImage" class="file-input-label">
-                                    📎 Görsel Seç
-                                </label>
-                            </div>
-                            <span id="fileName" style="font-size: 0.85rem; color: var(--text-secondary);"></span>
-                        </div>
-                        <button type="submit" class="btn btn-upload">Paylaş</button>
-                    </form>
-                </div>
-
-                <!-- Posts Section -->
-                <div class="posts-section" id="postsSection"></div>
-            </div>
-
-            <!-- Leaderboard -->
-            <div class="leaderboard">
-                <h3 class="leaderboard-title">🏆 Skor Tablosu</h3>
-                <div id="leaderboardContent"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Login/Register Modal -->
-    <div id="authModal" class="modal active">
-        <div class="modal-content">
-            <h2 class="modal-title">Hoş Geldiniz!</h2>
-            <div class="login-tabs">
-                <button class="login-tab active" onclick="switchAuthTab('login')">Giriş Yap</button>
-                <button class="login-tab" onclick="switchAuthTab('register')">Kayıt Ol</button>
-            </div>
-            <form class="login-form" id="authForm">
-                <div class="form-group">
+    <!-- GİRİŞ EKRANI -->
+    <div id="login-screen">
+        <div class="login-card">
+            <h2 class="login-title">Öğrenci Girişi</h2>
+            <form class="login-form" id="loginForm">
+                <div class="login-row">
                     <label>Kullanıcı Adı</label>
-                    <input type="text" id="authUsername" placeholder="Kullanıcı adınız" required>
+                    <input type="text" id="lUser" placeholder="İsmini gir..." required>
                 </div>
-                <div class="form-group">
+                <div class="login-row">
                     <label>Şifre</label>
-                    <input type="password" id="authPassword" placeholder="Şifreniz" required>
+                    <input type="password" id="lPass" placeholder="Şifreni gir..." required>
                 </div>
-                <button type="submit" class="btn btn-upload" id="authSubmitBtn">Giriş Yap</button>
+                <p id="lError" style="color:#ef4444; font-size:13px; font-weight:600; display:none;">Hatalı kullanıcı
+                    adı veya şifre!</p>
+                <button type="submit" class="btn-login">İçeri Gir</button>
             </form>
         </div>
     </div>
 
-    <!-- Image Modal -->
-    <div id="imageModal" class="modal">
-        <div class="modal-content image-modal-content">
-            <span class="modal-close" onclick="closeImageModal()">&times;</span>
-            <img id="modalImage" class="modal-image" src="" alt="">
-        </div>
-    </div>
+    <!-- ANA UYGULAMA -->
+    <div class="app" id="main-app" style="display: none;">
+        <header>
+            <div class="subtitle">2025 - 2026 EĞİTİM YILI</div>
+            <h1 id="headTitle">10-H Sınıfı Hatıra Kasası</h1>
+            <p id="subInfo" style="color: var(--muted); font-weight: 500; font-size: 17px; margin-top: 10px;">Geri sayım
+                başladı... Anılarını şimdiden yükle!</p>
+            <button onclick="logout()"
+                style="background:none; border:none; color:var(--muted); font-size:12px; cursor:pointer; margin-top:10px;">Çıkış
+                Yap</button>
+        </header>
 
-    <!-- Moderator Panel Modal -->
-    <div id="modPanel" class="modal">
-        <div class="modal-content" style="max-width: 1000px; max-height: 90vh; overflow-y: auto;">
-            <span class="modal-close" onclick="closeModPanel()">&times;</span>
-            <h2 class="modal-title">⚙️ Moderatör Paneli</h2>
-            
-            <div class="mod-tabs">
-                <button class="mod-tab active" onclick="switchModTab('posts')">📝 Tüm Gönderiler</button>
-                <button class="mod-tab" onclick="switchModTab('users')">👥 Kullanıcılar</button>
-                <button class="mod-tab" onclick="switchModTab('stats')">📊 İstatistikler</button>
+        <div id="countdown-section">
+            <div class="timer">
+                <div class="time-box"><span class="time-val" id="days">00</span><span class="time-label">GÜN</span>
+                </div>
+                <div class="time-box"><span class="time-val" id="hours">00</span><span class="time-label">SAAT</span>
+                </div>
+                <div class="time-box"><span class="time-val" id="minutes">00</span><span class="time-label">DK</span>
+                </div>
+                <div class="time-box"><span class="time-val" id="seconds">00</span><span class="time-label">SN</span>
+                </div>
             </div>
 
-            <!-- Posts Tab -->
-            <div id="modPostsTab" class="mod-tab-content active">
-                <div class="mod-section">
-                    <h3>Tüm Gönderiler</h3>
-                    <div class="filter-section">
-                        <select id="filterClass" onchange="filterModPosts()" style="padding: 0.5rem; border-radius: 8px; border: 2px solid var(--border); margin-right: 1rem;">
-                            <option value="">Tüm Sınıflar</option>
-                            <option value="9">9. Sınıf</option>
-                            <option value="10">10. Sınıf</option>
-                            <option value="11">11. Sınıf</option>
-                            <option value="12">12. Sınıf</option>
-                        </select>
-                        <select id="filterSubject" onchange="filterModPosts()" style="padding: 0.5rem; border-radius: 8px; border: 2px solid var(--border);">
-                            <option value="">Tüm Dersler</option>
-                            <option value="Matematik">Matematik</option>
-                            <option value="Fizik">Fizik</option>
-                            <option value="Kimya">Kimya</option>
-                            <option value="Biyoloji">Biyoloji</option>
-                            <option value="Tarih">Tarih</option>
-                            <option value="Coğrafya">Coğrafya</option>
-                            <option value="Edebiyat">Edebiyat</option>
-                            <option value="İngilizce">İngilizce</option>
-                        </select>
+            <div class="vault-container">
+                <div class="vault-card">
+                    <div style="text-align:center; margin-bottom:30px;">
+                        <span style="font-size:50px; display:block; margin-bottom:10px;">📸</span>
+                        <h2 style="font-weight: 800;">Kasaya Bir Fotoğraf Bırak</h2>
+                        <p style="color: var(--muted); font-size: 14px; margin-top: 5px;">26 Haziran 2026'da kilit
+                            açılınca tüm sınıf görecek!</p>
                     </div>
-                    <div id="modPostsList" style="margin-top: 1rem;"></div>
-                </div>
-            </div>
 
-            <!-- Users Tab -->
-            <div id="modUsersTab" class="mod-tab-content">
-                <div class="mod-section">
-                    <h3>Kayıtlı Kullanıcılar</h3>
-                    <div id="modUsersList"></div>
+                    <form class="upload-form" id="memoryForm">
+                        <div class="form-row">
+                            <input type="text" id="mName" placeholder="Adın Soyadın" required readonly>
+                        </div>
+                        <div class="form-row">
+                            <textarea id="mNote" rows="2"
+                                placeholder="Sınıf arkadaşlarına bir mesaj bırak..."></textarea>
+                        </div>
+                        <div class="form-row">
+                            <input type="file" id="mFile" accept="image/*" style="display:none" required>
+                            <div class="file-upload-box" onclick="document.getElementById('mFile').click()"
+                                id="fileLabel">
+                                🖼️ Fotoğraf Seç veya Sürükle
+                            </div>
+                        </div>
+                        <div class="prog-wrap" id="progWrap">
+                            <div
+                                style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:12px; font-weight:700;">
+                                <span style="color:var(--accent)">Yükleniyor...</span>
+                                <span id="progText">%0</span>
+                            </div>
+                            <div class="prog-bg">
+                                <div class="prog-fill" id="progFill"></div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-submit">🔒 Kasaya Kilitle</button>
+                    </form>
                 </div>
             </div>
+        </div>
 
-            <!-- Stats Tab -->
-            <div id="modStatsTab" class="mod-tab-content">
-                <div class="mod-section">
-                    <h3>Platform İstatistikleri</h3>
-                    <div id="modStats"></div>
-                </div>
+        <div id="unlocked-section">
+            <div style="text-align: center; margin-bottom: 50px;">
+                <span style="font-size: 70px; display: block; margin-bottom: 15px;">🔓</span>
+                <p style="font-size: 20px; color: var(--muted); font-weight: 600;">10-H mezuniyet hatıraları şimdi
+                    yayında!</p>
             </div>
+            <div id="gallery" class="gallery-grid"></div>
         </div>
     </div>
 
     <script>
-        // Data Storage with Firebase
-        let currentUser = null;
-        let currentClass = 9;
-        let currentSubject = 'Matematik';
-        let authMode = 'login';
-        let postsListener = null;
-        
-        const subjects = {
-            9: ['Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Tarih', 'Coğrafya', 'Edebiyat', 'İngilizce'],
-            10: ['Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Tarih', 'Coğrafya', 'Edebiyat', 'İngilizce'],
-            11: ['Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Tarih', 'Coğrafya', 'Edebiyat', 'İngilizce', 'Felsefe'],
-            12: ['Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Tarih', 'Coğrafya', 'Edebiyat', 'İngilizce', 'Din Kültürü']
+        // --- AUTH LOGIC ---
+        // Şimdilik test bilgileri. Sen listeyi attığında burayı güncelleyebilirim.
+        const VALID_USERS = {
+            "10h": "2026",
+            "egemen": "1234",
+            "omer": "5678"
         };
 
-        // LocalStorage keys (for backward compatibility - users only)
-        const USERS_KEY = 'ders_users';
-
-        // Initialize data
-        async function initializeData() {
-            if (!localStorage.getItem(USERS_KEY)) {
-                // Create admin users by default
-                const initialUsers = [
-                    {
-                        username: 'Egm1141',
-                        password: 'about',
-                        registeredAt: new Date().toISOString()
-                    },
-                    {
-                        username: 'Omrr1311',
-                        password: 'about',
-                        registeredAt: new Date().toISOString()
-                    }
-                ];
-                localStorage.setItem(USERS_KEY, JSON.stringify(initialUsers));
-            }
-        }
-
-        // Get data
-        function getUsers() {
-            return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-        }
-
-        async function getPosts() {
-            try {
-                const postsCol = window.firestore.collection(window.db, 'posts');
-                const q = window.firestore.query(postsCol, window.firestore.orderBy('createdAt', 'desc'));
-                const snapshot = await window.firestore.getDocs(q);
-                return snapshot.docs.map(doc => ({
-                    firestoreId: doc.id,
-                    ...doc.data()
-                }));
-            } catch (error) {
-                console.error('Error getting posts:', error);
-                return [];
-            }
-        }
-
-        // Save data
-        function saveUsers(users) {
-            localStorage.setItem(USERS_KEY, JSON.stringify(users));
-        }
-
-        async function savePost(post) {
-            try {
-                const postsCol = window.firestore.collection(window.db, 'posts');
-                await window.firestore.addDoc(postsCol, post);
-            } catch (error) {
-                console.error('Error saving post:', error);
-                alert('❌ Gönderi kaydedilirken hata oluştu!');
-            }
-        }
-
-        async function deletePostFromFirestore(firestoreId) {
-            try {
-                const postDoc = window.firestore.doc(window.db, 'posts', firestoreId);
-                await window.firestore.deleteDoc(postDoc);
-            } catch (error) {
-                console.error('Error deleting post:', error);
-                alert('❌ Gönderi silinirken hata oluştu!');
-            }
-        }
-
-        // Auth functions
-        function switchAuthTab(mode) {
-            authMode = mode;
-            const tabs = document.querySelectorAll('.login-tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            
-            // Find and activate the clicked tab
-            tabs.forEach(tab => {
-                if ((mode === 'login' && tab.textContent === 'Giriş Yap') || 
-                    (mode === 'register' && tab.textContent === 'Kayıt Ol')) {
-                    tab.classList.add('active');
-                }
-            });
-            
-            const submitBtn = document.getElementById('authSubmitBtn');
-            submitBtn.textContent = mode === 'login' ? 'Giriş Yap' : 'Kayıt Ol';
-        }
-
-        document.getElementById('authForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('authUsername').value.trim();
-            const password = document.getElementById('authPassword').value;
-
-            if (!username || !password) {
-                alert('Lütfen tüm alanları doldurun!');
-                return;
-            }
-
-            const users = getUsers();
-
-            if (authMode === 'register') {
-                // Check if username exists
-                if (users.find(u => u.username === username)) {
-                    alert('Bu kullanıcı adı zaten kullanılıyor!');
-                    return;
-                }
-
-                // Create new user
-                users.push({
-                    username: username,
-                    password: password,
-                    registeredAt: new Date().toISOString()
-                });
-                saveUsers(users);
-                alert('✅ Kayıt başarılı! Şimdi giriş yapabilirsiniz.');
-                
-                // Switch to login tab
-                authMode = 'login';
-                const tabs = document.querySelectorAll('.login-tab');
-                tabs.forEach(tab => tab.classList.remove('active'));
-                tabs[0].classList.add('active');
-                document.getElementById('authSubmitBtn').textContent = 'Giriş Yap';
-                document.getElementById('authForm').reset();
+        function login(user, pass) {
+            if (VALID_USERS[user.toLowerCase()] === pass) {
+                localStorage.setItem('10h_vault_user', user);
+                showApp(user);
             } else {
-                // Login
-                const user = users.find(u => u.username === username && u.password === password);
-                if (user) {
-                    currentUser = user;
-                    document.getElementById('authModal').classList.remove('active');
-                    document.getElementById('mainContent').style.display = 'block';
-                    document.getElementById('userInfo').style.display = 'flex';
-                    const isAdmin = username === 'Egm1141' || username === 'Omrr1311';
-                    document.getElementById('currentUserName').textContent = username + (isAdmin ? ' 👑' : '');
-                    loadSubjects();
-                    loadPosts();
-                    updateLeaderboard();
-                } else {
-                    alert('❌ Kullanıcı adı veya şifre hatalı!');
-                }
+                document.getElementById('lError').style.display = 'block';
             }
-        });
+        }
 
         function logout() {
-            if (postsListener) {
-                postsListener(); // Unsubscribe from real-time updates
-            }
-            currentUser = null;
-            document.getElementById('authModal').classList.add('active');
-            document.getElementById('mainContent').style.display = 'none';
-            document.getElementById('userInfo').style.display = 'none';
-            document.getElementById('authForm').reset();
+            localStorage.removeItem('10h_vault_user');
+            location.reload();
         }
 
-        // Class selection
-        function selectClass(classNumber) {
-            currentClass = classNumber;
-            const buttons = document.querySelectorAll('.class-btn');
-            buttons.forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.textContent.includes(classNumber.toString())) {
-                    btn.classList.add('active');
-                }
-            });
-            loadSubjects();
-            loadPosts();
+        function showApp(userName) {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            document.getElementById('mName').value = userName; // İsmi otomatik odakla
         }
 
-        // Load subjects
-        function loadSubjects() {
-            const container = document.getElementById('subjectTabs');
-            container.innerHTML = '';
-            
-            subjects[currentClass].forEach((subject, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'subject-tab' + (index === 0 ? ' active' : '');
-                btn.textContent = subject;
-                btn.onclick = () => selectSubject(subject);
-                container.appendChild(btn);
-            });
-            
-            currentSubject = subjects[currentClass][0];
-        }
+        // Sayfa yüklendiğinde oturum kontrolü
+        const savedUser = localStorage.getItem('10h_vault_user');
+        if (savedUser) showApp(savedUser);
 
-        function selectSubject(subject) {
-            currentSubject = subject;
-            const buttons = document.querySelectorAll('.subject-tab');
-            buttons.forEach(btn => {
-                btn.classList.toggle('active', btn.textContent === subject);
-            });
-            loadPosts();
-        }
-
-        // File upload handling
-        document.getElementById('postImage').addEventListener('change', function(e) {
-            const fileName = e.target.files[0]?.name || '';
-            document.getElementById('fileName').textContent = fileName ? `Seçili: ${fileName}` : '';
-        });
-
-        // Upload post
-        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', e => {
             e.preventDefault();
-            
-            const title = document.getElementById('postTitle').value.trim();
-            const description = document.getElementById('postDescription').value.trim();
-            const imageFile = document.getElementById('postImage').files[0];
-
-            if (!title || !imageFile) {
-                alert('Lütfen başlık ve görsel seçin!');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = async function(event) {
-                const newPost = {
-                    id: Date.now(),
-                    title: title,
-                    description: description,
-                    image: event.target.result,
-                    author: currentUser.username,
-                    class: currentClass,
-                    subject: currentSubject,
-                    createdAt: new Date().toISOString()
-                };
-
-                await savePost(newPost);
-                
-                // Reset form
-                document.getElementById('uploadForm').reset();
-                document.getElementById('fileName').textContent = '';
-                
-                alert('✅ Konu anlatımınız başarıyla paylaşıldı!');
-                // Posts will auto-update via listener
-            };
-
-            reader.readAsDataURL(imageFile);
+            login(document.getElementById('lUser').value, document.getElementById('lPass').value);
         });
 
-        // Load posts - UPDATED TO SHOW ALL POSTS WITH FIREBASE
-        async function loadPosts() {
-            const container = document.getElementById('postsSection');
-            
-            // Setup real-time listener
-            if (postsListener) {
-                postsListener(); // Unsubscribe previous listener
-            }
-            
-            const postsCol = window.firestore.collection(window.db, 'posts');
-            const q = window.firestore.query(postsCol, window.firestore.orderBy('createdAt', 'desc'));
-            
-            postsListener = window.firestore.onSnapshot(q, (snapshot) => {
-                let posts = snapshot.docs.map(doc => ({
-                    firestoreId: doc.id,
-                    ...doc.data()
-                }));
-                
-                // Filter by selected class and subject
-                posts = posts.filter(p => p.class === currentClass && p.subject === currentSubject);
+        // --- MAIN APP LOGIC ---
+        const targetDate = new Date('June 26, 2026 00:00:00').getTime();
+        let isOpened = false;
 
-                if (posts.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📭</div>
-                            <h3>Henüz içerik yok</h3>
-                            <p>Bu kategori için henüz konu anlatımı paylaşılmamış. İlk paylaşan sen ol!</p>
-                        </div>
-                    `;
-                    return;
-                }
+        document.getElementById('mFile').addEventListener('change', e => {
+            const fileName = e.target.files[0]?.name;
+            document.getElementById('fileLabel').innerHTML = fileName ? `✅ ${fileName}` : `🖼️ Dosya Seç veya Sürükle`;
+        });
 
-                container.innerHTML = posts.map(post => `
-                    <div class="post-card">
-                        <div class="post-header">
-                            <div class="post-author">
-                                <div class="author-avatar">${post.author[0].toUpperCase()}</div>
-                                <div class="author-info">
-                                    <div class="author-name">
-                                        ${post.author}
-                                        ${(post.author === 'Egm1141' || post.author === 'Omrr1311') ? '<span class="admin-badge">ADMIN</span>' : ''}
-                                    </div>
-                                    <div class="post-date">
-                                        <span style="background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; margin-right: 0.5rem;">
-                                            ${post.class}. Sınıf
-                                        </span>
-                                        <span style="background: var(--success); color: white; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; margin-right: 0.5rem;">
-                                            ${post.subject}
-                                        </span>
-                                        ${formatDate(post.createdAt)}
-                                    </div>
-                                </div>
-                            </div>
-                            ${(currentUser.username === 'Egm1141' || currentUser.username === 'Omrr1311') ? `
-                                <div class="post-actions">
-                                    <button class="btn btn-danger btn-sm" onclick="deletePost('${post.firestoreId}')">🗑️ Sil</button>
-                                </div>
-                            ` : ''}
-                        </div>
-                        <img src="${post.image}" alt="${post.title}" class="post-image" onclick="openImageModal('${post.image}')">
-                        <div class="post-content">
-                            <h3 class="post-title">${post.title}</h3>
-                            ${post.description ? `<p class="post-description">${post.description}</p>` : ''}
+        document.getElementById('memoryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('mName').value;
+            const note = document.getElementById('mNote').value;
+            const file = document.getElementById('mFile').files[0];
+            const wrap = document.getElementById('progWrap'), fill = document.getElementById('progFill'), txt = document.getElementById('progText');
+            wrap.style.display = 'block';
+
+            try {
+                const sRef = window.fb.ref(window.fb.storage, `10h_vault/${Date.now()}_${name}_${file.name}`);
+                const uploadTask = window.fb.uploadBytesResumable(sRef, file);
+                uploadTask.on('state_changed',
+                    (snap) => {
+                        const pct = (snap.bytesTransferred / snap.totalBytes) * 100;
+                        fill.style.width = pct + '%'; txt.innerText = `%${Math.round(pct)}`;
+                    },
+                    (err) => alert('Hata: ' + err.message),
+                    async () => {
+                        const url = await window.fb.getDownloadURL(uploadTask.snapshot.ref);
+                        await window.fb.addDoc(window.fb.collection(window.fb.db, '10h_memories'), {
+                            name, note, photo: url, date: new Date().toISOString()
+                        });
+                        alert('✅ Anın başarıyla kasaya kilitlendi.');
+                        document.getElementById('memoryForm').reset();
+                        document.getElementById('fileLabel').innerHTML = `🖼️ Fotoğraf Seç veya Sürükle`;
+                        wrap.style.display = 'none';
+                    }
+                );
+            } catch (err) { alert('Hata oluştu.'); wrap.style.display = 'none'; }
+        });
+
+        function initGallery() {
+            const q = window.fb.query(window.fb.collection(window.fb.db, '10h_memories'), window.fb.orderBy('date', 'desc'));
+            window.fb.onSnapshot(q, (snapshot) => {
+                const list = snapshot.docs.map(d => d.data());
+                const container = document.getElementById('gallery');
+                container.innerHTML = list.map(m => `
+                    <div class="memory-card">
+                        <img src="${m.photo}" class="memory-img" loading="lazy">
+                        <div class="card-body">
+                            <div class="card-name">${m.name}</div>
+                            <div class="card-note">"${m.note || ''}"</div>
                         </div>
                     </div>
                 `).join('');
-                
-                // Update leaderboard when posts change
-                updateLeaderboard();
             });
         }
 
-        // Delete post (admin only)
-        async function deletePost(firestoreId) {
-            if (currentUser.username !== 'Egm1141' && currentUser.username !== 'Omrr1311') {
-                alert('Bu işlemi yapmaya yetkiniz yok!');
-                return;
-            }
-
-            if (confirm('Bu gönderiyi silmek istediğinize emin misiniz?')) {
-                await deletePostFromFirestore(firestoreId);
-                alert('✅ Gönderi silindi!');
-                // Posts will auto-update via listener
-            }
-        }
-
-        // Update leaderboard
-        async function updateLeaderboard() {
-            const container = document.getElementById('leaderboardContent');
-            const posts = await getPosts();
-            
-            // Count posts per user
-            const userCounts = {};
-            posts.forEach(post => {
-                userCounts[post.author] = (userCounts[post.author] || 0) + 1;
-            });
-
-            // Sort by count
-            const leaderboard = Object.entries(userCounts)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10);
-
-            if (leaderboard.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Henüz paylaşım yok</p>';
-                return;
-            }
-
-            container.innerHTML = leaderboard.map(([username, count], index) => `
-                <div class="leaderboard-item">
-                    <div class="rank rank-${index + 1}">#${index + 1}</div>
-                    <div class="leader-avatar">${username[0].toUpperCase()}</div>
-                    <div class="leader-info">
-                        <div class="leader-name">
-                            ${username}
-                            ${(username === 'Egm1141' || username === 'Omrr1311') ? '<span class="admin-badge">ADMIN</span>' : ''}
-                        </div>
-                        <div class="leader-score">${count} paylaşım</div>
-                    </div>
-                    <div class="score-badge">${count}</div>
-                </div>
-            `).join('');
-        }
-
-        // Image modal
-        function openImageModal(imageSrc) {
-            document.getElementById('modalImage').src = imageSrc;
-            document.getElementById('imageModal').classList.add('active');
-        }
-
-        function closeImageModal() {
-            document.getElementById('imageModal').classList.remove('active');
-        }
-
-        // Moderator Panel
-        function openModPanel() {
-            document.getElementById('modPanel').classList.add('active');
-            loadModPosts();
-            loadModUsers();
-            loadModStats();
-        }
-
-        function closeModPanel() {
-            document.getElementById('modPanel').classList.remove('active');
-        }
-
-        function switchModTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.mod-tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.mod-tab').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            // Show selected tab
-            document.getElementById('mod' + tabName.charAt(0).toUpperCase() + tabName.slice(1) + 'Tab').classList.add('active');
-            
-            // Activate button
-            const buttons = document.querySelectorAll('.mod-tab');
-            buttons.forEach(btn => {
-                if (btn.textContent.toLowerCase().includes(tabName === 'posts' ? 'gönderi' : tabName === 'users' ? 'kullanıcı' : 'istatistik')) {
-                    btn.classList.add('active');
+        function updateTimer() {
+            const now = new Date().getTime(), remaining = targetDate - now;
+            const isTest = new URLSearchParams(window.location.search).get('test') === 'true';
+            if (remaining <= 0 || isTest) {
+                if (!isOpened) {
+                    isOpened = true;
+                    document.getElementById('countdown-section').style.display = 'none';
+                    document.getElementById('unlocked-section').style.display = 'block';
+                    document.getElementById('headTitle').innerText = "10-H Mezuniyet Duvarı";
+                    initGallery();
                 }
-            });
-        }
-
-        function loadModPosts() {
-            filterModPosts();
-        }
-
-        async function filterModPosts() {
-            const filterClass = document.getElementById('filterClass').value;
-            const filterSubject = document.getElementById('filterSubject').value;
-            
-            let posts = await getPosts();
-            
-            if (filterClass) {
-                posts = posts.filter(p => p.class == filterClass);
-            }
-            
-            if (filterSubject) {
-                posts = posts.filter(p => p.subject === filterSubject);
-            }
-            
-            displayModPosts(posts);
-        }
-
-        function displayModPosts(posts) {
-            const container = document.getElementById('modPostsList');
-            
-            if (posts.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">Gönderi bulunamadı</p>';
                 return;
             }
-
-            container.innerHTML = posts.map(post => `
-                <div class="mod-post-item">
-                    <img src="${post.image}" class="mod-post-thumbnail" onclick="openImageModal('${post.image}')" alt="${post.title}">
-                    <div class="mod-post-info">
-                        <div class="mod-post-title">${post.title}</div>
-                        <div class="mod-post-meta">
-                            👤 ${post.author} | 
-                            📚 ${post.class}. Sınıf - ${post.subject} | 
-                            📅 ${formatDate(post.createdAt)}
-                        </div>
-                        ${post.description ? `<div style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">${post.description}</div>` : ''}
-                        <div class="mod-post-actions" style="margin-top: 1rem;">
-                            <button class="btn btn-danger btn-sm" onclick="deletePostMod('${post.firestoreId}')">🗑️ Sil</button>
-                            <button class="btn btn-primary btn-sm" onclick="openImageModal('${post.image}')">👁️ Görüntüle</button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+            const d = Math.floor(remaining / (1000 * 60 * 60 * 24));
+            const h = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((remaining % (1000 * 60)) / 1000);
+            document.getElementById('days').innerText = String(d).padStart(2, '0');
+            document.getElementById('hours').innerText = String(h).padStart(2, '0');
+            document.getElementById('minutes').innerText = String(m).padStart(2, '0');
+            document.getElementById('seconds').innerText = String(s).padStart(2, '0');
         }
-
-        async function deletePostMod(firestoreId) {
-            if (confirm('Bu gönderiyi silmek istediğinize emin misiniz?')) {
-                await deletePostFromFirestore(firestoreId);
-                loadModPosts();
-                alert('✅ Gönderi silindi!');
-                // Posts will auto-update via listener
-            }
-        }
-
-        async function loadModUsers() {
-            const container = document.getElementById('modUsersList');
-            const users = getUsers();
-            const posts = await getPosts();
-
-            if (users.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">Kullanıcı bulunamadı</p>';
-                return;
-            }
-
-            container.innerHTML = users.map(user => {
-                const userPostCount = posts.filter(p => p.author === user.username).length;
-                return `
-                    <div class="user-item">
-                        <div class="user-item-info">
-                            <div class="author-avatar">${user.username[0].toUpperCase()}</div>
-                            <div>
-                                <div style="font-weight: 600;">
-                                    ${user.username}
-                                    ${user.username === 'Egm1141' ? '<span class="admin-badge">ADMIN</span>' : ''}
-                                </div>
-                                <div style="font-size: 0.85rem; color: var(--text-secondary);">
-                                    📅 Kayıt: ${new Date(user.registeredAt).toLocaleDateString('tr-TR')} | 
-                                    📝 ${userPostCount} gönderi
-                                </div>
-                            </div>
-                        </div>
-                        ${user.username !== 'Egm1141' && currentUser.username === 'Egm1141' ? `
-                            <button class="btn btn-danger btn-sm" onclick="deleteUser('${user.username}')">🗑️ Kullanıcıyı Sil</button>
-                        ` : ''}
-                    </div>
-                `;
-            }).join('');
-        }
-
-        async function deleteUser(username) {
-            if (username === 'Egm1141') {
-                alert('❌ Admin kullanıcısı silinemez!');
-                return;
-            }
-
-            if (confirm(`"${username}" kullanıcısını ve tüm gönderilerini silmek istediğinize emin misiniz?`)) {
-                // Delete user
-                let users = getUsers();
-                users = users.filter(u => u.username !== username);
-                saveUsers(users);
-
-                // Delete user's posts from Firestore
-                const posts = await getPosts();
-                const userPosts = posts.filter(p => p.author === username);
-                for (const post of userPosts) {
-                    await deletePostFromFirestore(post.firestoreId);
-                }
-
-                loadModUsers();
-                alert('✅ Kullanıcı ve gönderileri silindi!');
-            }
-        }
-
-        async function loadModStats() {
-            const container = document.getElementById('modStats');
-            const users = getUsers();
-            const posts = await getPosts();
-
-            const postsByClass = {
-                9: posts.filter(p => p.class === 9).length,
-                10: posts.filter(p => p.class === 10).length,
-                11: posts.filter(p => p.class === 11).length,
-                12: posts.filter(p => p.class === 12).length
-            };
-
-            const subjectCounts = {};
-            posts.forEach(post => {
-                subjectCounts[post.subject] = (subjectCounts[post.subject] || 0) + 1;
-            });
-
-            const topSubject = Object.entries(subjectCounts).sort((a, b) => b[1] - a[1])[0];
-
-            container.innerHTML = `
-                <div class="stat-grid">
-                    <div class="stat-card">
-                        <div class="stat-number">${users.length}</div>
-                        <div class="stat-label">Toplam Kullanıcı</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">${posts.length}</div>
-                        <div class="stat-label">Toplam Gönderi</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">${topSubject ? topSubject[0] : '-'}</div>
-                        <div class="stat-label">En Popüler Ders</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">${(posts.length / users.length || 0).toFixed(1)}</div>
-                        <div class="stat-label">Kullanıcı Başına Gönderi</div>
-                    </div>
-                </div>
-                
-                <div style="margin-top: 2rem;">
-                    <h4 style="margin-bottom: 1rem; color: var(--primary);">Sınıflara Göre Gönderiler</h4>
-                    <div class="stat-grid">
-                        <div class="stat-card">
-                            <div class="stat-number">${postsByClass[9]}</div>
-                            <div class="stat-label">9. Sınıf</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number">${postsByClass[10]}</div>
-                            <div class="stat-label">10. Sınıf</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number">${postsByClass[11]}</div>
-                            <div class="stat-label">11. Sınıf</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number">${postsByClass[12]}</div>
-                            <div class="stat-label">12. Sınıf</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // Utility functions
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            const diff = now - date;
-            const minutes = Math.floor(diff / 60000);
-            const hours = Math.floor(diff / 3600000);
-            const days = Math.floor(diff / 86400000);
-
-            if (minutes < 1) return 'Az önce';
-            if (minutes < 60) return `${minutes} dakika önce`;
-            if (hours < 24) return `${hours} saat önce`;
-            if (days < 7) return `${days} gün önce`;
-            
-            return date.toLocaleDateString('tr-TR');
-        }
-
-        // Initialize
-        initializeData();
+        setInterval(updateTimer, 1000);
+        updateTimer();
     </script>
 </body>
+
 </html>
