@@ -263,7 +263,64 @@
     // -------------------------
     //  REVEAL & CONTENT
     // -------------------------
-    const targetDate = new Date('March 25, 2026 20:05:00').getTime();
+    // Hedef: bugün Europe/Istanbul saatine göre 21:10
+    (function(){
+      const tz = 'Europe/Istanbul';
+      const now = new Date();
+      // Istanbul local date components based on Intl
+      const parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: tz,
+        year: 'numeric', month: 'numeric', day: 'numeric',
+        hour: 'numeric', minute: 'numeric', second: 'numeric',
+        hour12: false
+      }).formatToParts(now).reduce((acc, p) => {
+        if (p.type !== 'literal') acc[p.type] = p.value;
+        return acc;
+      }, {});
+      // Build Istanbul date string for today at 21:10:00
+      const istYear = parts.year;
+      const istMonth = parts.month.padStart(2,'0');
+      const istDay = parts.day.padStart(2,'0');
+      const istDateTimeStr = `${istYear}-${istMonth}-${istDay}T21:10:00`;
+      // Parse as if in Istanbul by creating a Date from the same components in UTC,
+      // then convert using the timezone offset difference.
+      // Create Date object for the intended wall-clock time in Istanbul:
+      const [y,m,d,h,mm,s] = istDateTimeStr.split(/[-T:]/).map(Number);
+      // Create a Date object in UTC that corresponds to the same Y-M-D H:M:S in the target tz.
+      // To get the correct epoch ms for that local time in tz, use Date.toLocaleString trick:
+      const asUTCString = new Date(Date.UTC(y, m-1, d, h, mm, s)).toLocaleString('en-US', { timeZone: tz });
+      const localEquivalent = new Date(asUTCString);
+      // Compute the epoch ms for the intended Istanbul wall time by adjusting difference
+      // between the wall-clock and the UTC equivalent.
+      const targetDate = (function(){
+        const desired = { year:y, month:m, day:d, hour:h, minute:mm, second:s };
+        const start = Date.UTC(y, m-1, d, h, mm, s) - 12*3600*1000;
+        for (let off = 0; off <= 24*3600*1000; off += 1000) {
+          const candidate = new Date(start + off);
+          const candParts = new Intl.DateTimeFormat('en-GB', {
+            timeZone: tz,
+            year: 'numeric', month: 'numeric', day: 'numeric',
+            hour: 'numeric', minute: 'numeric', second: 'numeric',
+            hour12: false
+          }).formatToParts(candidate).reduce((acc, p) => {
+            if (p.type !== 'literal') acc[p.type] = p.value;
+            return acc;
+          }, {});
+          if (Number(candParts.year) === desired.year &&
+              Number(candParts.month) === desired.month &&
+              Number(candParts.day) === desired.day &&
+              Number(candParts.hour) === desired.hour &&
+              Number(candParts.minute) === desired.minute) {
+            return candidate.getTime();
+          }
+        }
+        return new Date(y, m-1, d, h, mm, s).getTime();
+      })();
+
+      window.__TARGET_DATE_MS = targetDate;
+    })();
+    const targetDate = window.__TARGET_DATE_MS;
+
     let isReveal = false;
 
     function updateTimer() {
