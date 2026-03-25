@@ -626,7 +626,7 @@
       const filePath = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
 
       const { error: upErr } = await sb.storage
-        .from('10h')
+        .from('photos')
         .upload(filePath, file, { cacheControl: '3600', upsert: false });
       if (upErr) throw upErr;
 
@@ -634,7 +634,7 @@
       txt.innerText = 'Kaydediliyor…';
 
       // 2. Public URL al
-      const { data: pubData } = sb.storage.from('10h').getPublicUrl(filePath);
+      const { data: pubData } = sb.storage.from('photos').getPublicUrl(filePath);
       const photoUrl = pubData.publicUrl;
 
       // 3. DB'ye kaydet
