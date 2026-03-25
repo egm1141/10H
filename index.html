@@ -1,746 +1,936 @@
 <!doctype html>
 <html lang="tr">
+
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>10-H · Hatıra Duvarı</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg:       #0e0e10;
-      --surface:  #161618;
-      --surface2: #1e1e21;
-      --border:   rgba(255,255,255,0.07);
-      --yellow:   #f5c518;
-      --yellow2:  #ffd83d;
-      --muted:    #888896;
-      --text:     #f0f0f5;
-      --glow:     rgba(245,197,24,0.18);
-    }
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>10-H · Hatıra Duvarı</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@300;400&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0e0e10;
+            --surface: #161618;
+            --surface2: #1e1e21;
+            --border: rgba(255, 255, 255, 0.07);
+            --yellow: #f5c518;
+            --yellow2: #ffd83d;
+            --muted: #888896;
+            --text: #f0f0f5;
+            --glow: rgba(245, 197, 24, 0.18);
+        }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    html, body {
-      min-height: 100%;
-      font-family: 'DM Sans', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
+        html,
+        body {
+            min-height: 100%;
+            font-family: 'DM Sans', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
 
-    /* radial glow at top */
-    body::before {
-      content: '';
-      position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
-      width: 800px; height: 500px;
-      background: radial-gradient(ellipse, rgba(245,197,24,0.08) 0%, transparent 70%);
-      pointer-events: none; z-index: 0;
-    }
+        /* radial glow at top */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 500px;
+            background: radial-gradient(ellipse, rgba(245, 197, 24, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
 
-    .wrap { position: relative; z-index: 1; max-width: 1040px; margin: 0 auto; padding: 0 24px 60px; }
+        .wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 0 24px 60px;
+        }
 
-    /* ---- HEADER ---- */
-    header {
-      padding: 48px 0 32px;
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: flex-end; justify-content: space-between; gap: 20px;
-    }
+        /* ---- HEADER ---- */
+        header {
+            padding: 48px 0 32px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 20px;
+        }
 
-    .logo-year {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px; letter-spacing: 0.22em; color: var(--yellow);
-      text-transform: uppercase; margin-bottom: 8px;
-    }
+        .logo-year {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.22em;
+            color: var(--yellow);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
 
-    h1 {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(56px, 9vw, 96px);
-      line-height: 0.92;
-      letter-spacing: 0.02em;
-      color: var(--text);
-    }
+        h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(56px, 9vw, 96px);
+            line-height: 0.92;
+            letter-spacing: 0.02em;
+            color: var(--text);
+        }
 
-    h1 span { color: var(--yellow); }
+        h1 span {
+            color: var(--yellow);
+        }
 
-    .header-right { text-align: right; }
+        .header-right {
+            text-align: right;
+        }
 
-    .header-tagline {
-      font-size: 13px; color: var(--muted);
-      font-family: 'DM Mono', monospace;
-      letter-spacing: 0.04em; line-height: 1.7;
-    }
+        .header-tagline {
+            font-size: 13px;
+            color: var(--muted);
+            font-family: 'DM Mono', monospace;
+            letter-spacing: 0.04em;
+            line-height: 1.7;
+        }
 
-    /* ---- BUTTONS ---- */
-    .btn {
-      display: inline-block;
-      padding: 11px 22px;
-      border-radius: 100px;
-      border: none;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px; font-weight: 500;
-      cursor: pointer;
-      transition: all 0.18s ease;
-      letter-spacing: 0.01em;
-    }
-    .btn-fill {
-      background: var(--yellow);
-      color: #0e0e10;
-    }
-    .btn-fill:hover { background: var(--yellow2); transform: translateY(-1px); box-shadow: 0 6px 24px var(--glow); }
+        /* ---- BUTTONS ---- */
+        .btn {
+            display: inline-block;
+            padding: 11px 22px;
+            border-radius: 100px;
+            border: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            letter-spacing: 0.01em;
+        }
 
-    .btn-outline {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--muted);
-    }
-    .btn-outline:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+        .btn-fill {
+            background: var(--yellow);
+            color: #0e0e10;
+        }
 
-    .btn-header {
-      margin-top: 14px;
-      padding: 9px 20px;
-      border-radius: 100px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      font-family: 'DM Mono', monospace;
-      font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
-      cursor: pointer;
-      transition: all 0.18s;
-    }
-    .btn-header:hover { border-color: var(--yellow); color: var(--yellow); }
+        .btn-fill:hover {
+            background: var(--yellow2);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px var(--glow);
+        }
 
-    /* ---- LOGIN CARD ---- */
-    .login-card {
-      max-width: 420px; margin: 52px auto 0;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 38px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-    }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+        }
 
-    .login-card h2 {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 52px; line-height: 1; letter-spacing: 0.02em;
-      margin-bottom: 4px;
-    }
+        .btn-outline:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            color: var(--text);
+        }
 
-    .login-card .subtitle {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px; color: var(--muted); letter-spacing: 0.12em;
-      margin-bottom: 30px;
-    }
+        .btn-header {
+            margin-top: 14px;
+            padding: 9px 20px;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.18s;
+        }
 
-    fieldset { border: none; display: grid; gap: 16px; }
+        .btn-header:hover {
+            border-color: var(--yellow);
+            color: var(--yellow);
+        }
 
-    .field label {
-      display: block;
-      font-family: 'DM Mono', monospace;
-      font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 8px;
-    }
+        /* ---- LOGIN CARD ---- */
+        .login-card {
+            max-width: 420px;
+            margin: 52px auto 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 38px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
 
-    .field input {
-      width: 100%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 13px 16px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px; color: var(--text);
-      outline: none;
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-    .field input:focus {
-      border-color: var(--yellow);
-      box-shadow: 0 0 0 3px rgba(245,197,24,0.12);
-    }
+        .login-card h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 52px;
+            line-height: 1;
+            letter-spacing: 0.02em;
+            margin-bottom: 4px;
+        }
 
-    .form-actions { display: flex; gap: 10px; margin-top: 24px; align-items: center; }
+        .login-card .subtitle {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 0.12em;
+            margin-bottom: 30px;
+        }
 
-    .error-msg {
-      font-size: 13px; color: #ff6b6b;
-      margin-top: 12px; display: none;
-      font-weight: 500;
-    }
+        fieldset {
+            border: none;
+            display: grid;
+            gap: 16px;
+        }
 
-    /* ---- MAIN APP ---- */
-    #main-app { display: none; }
+        .field label {
+            display: block;
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
 
-    .app-grid {
-      display: grid;
-      grid-template-columns: 1fr 272px;
-      gap: 20px;
-      margin-top: 36px;
-      align-items: start;
-    }
+        .field input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 13px 16px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
 
-    @media (max-width: 860px) { .app-grid { grid-template-columns: 1fr; } }
+        .field input:focus {
+            border-color: var(--yellow);
+            box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.12);
+        }
 
-    /* ---- LABELS ---- */
-    .section-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
-      color: var(--yellow);
-      margin-bottom: 10px;
-    }
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 24px;
+            align-items: center;
+        }
 
-    h2.section-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 38px; letter-spacing: 0.02em; line-height: 1;
-      margin-bottom: 22px;
-    }
+        .error-msg {
+            font-size: 13px;
+            color: #ff6b6b;
+            margin-top: 12px;
+            display: none;
+            font-weight: 500;
+        }
 
-    /* ---- MEMORY FORM ---- */
-    .memory-form-wrap {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 28px;
-    }
+        /* ---- MAIN APP ---- */
+        #main-app {
+            display: none;
+        }
 
-    textarea {
-      width: 100%; resize: none;
-      background: var(--surface2);
-      border: 1px solid var(--border); border-radius: 12px;
-      padding: 12px 16px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px; color: var(--text);
-      line-height: 1.6; outline: none;
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-    textarea:focus {
-      border-color: var(--yellow);
-      box-shadow: 0 0 0 3px rgba(245,197,24,0.10);
-    }
+        .app-grid {
+            display: grid;
+            grid-template-columns: 1fr 272px;
+            gap: 20px;
+            margin-top: 36px;
+            align-items: start;
+        }
 
-    .file-pick {
-      display: flex; align-items: center; gap: 12px; cursor: pointer;
-      border: 1.5px dashed rgba(255,255,255,0.12); border-radius: 12px;
-      padding: 14px 16px;
-      background: var(--surface2);
-      font-family: 'DM Mono', monospace;
-      font-size: 12px; color: var(--muted);
-      transition: border-color 0.15s, background 0.15s;
-    }
-    .file-pick:hover { border-color: var(--yellow); background: rgba(245,197,24,0.04); color: var(--text); }
-    .file-pick-icon { font-size: 20px; }
+        @media (max-width: 860px) {
+            .app-grid {
+                grid-template-columns: 1fr;
+            }
+        }
 
-    /* ---- PROGRESS ---- */
-    .prog-wrap {
-      display: none; height: 3px;
-      background: var(--surface2); border-radius: 999px; overflow: hidden; margin-top: 14px;
-    }
-    .prog-fill {
-      height: 100%; width: 0;
-      background: linear-gradient(90deg, var(--yellow), var(--yellow2));
-      border-radius: 999px;
-      transition: width 0.3s ease;
-    }
-    .prog-text {
-      font-family: 'DM Mono', monospace;
-      font-size: 10px; color: var(--muted); margin-top: 6px;
-    }
+        /* ---- LABELS ---- */
+        .section-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--yellow);
+            margin-bottom: 10px;
+        }
 
-    /* ---- COUNTDOWN ---- */
-    .countdown-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 24px;
-      margin-top: 16px;
-      position: relative; overflow: hidden;
-    }
+        h2.section-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 38px;
+            letter-spacing: 0.02em;
+            line-height: 1;
+            margin-bottom: 22px;
+        }
 
-    .countdown-card::before {
-      content: '';
-      position: absolute; bottom: -40px; right: -40px;
-      width: 160px; height: 160px;
-      background: radial-gradient(circle, var(--glow) 0%, transparent 70%);
-      pointer-events: none;
-    }
+        /* ---- MEMORY FORM ---- */
+        .memory-form-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+        }
 
-    .cd-grid {
-      display: grid; grid-template-columns: repeat(4, 1fr);
-      gap: 8px; margin-top: 10px;
-    }
+        textarea {
+            width: 100%;
+            resize: none;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            color: var(--text);
+            line-height: 1.6;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
 
-    .cd-unit {
-      text-align: center;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px 8px 12px;
-    }
+        textarea:focus {
+            border-color: var(--yellow);
+            box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.10);
+        }
 
-    .cd-num {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 40px; line-height: 1; color: var(--yellow);
-      font-variant-numeric: tabular-nums; letter-spacing: 0.02em;
-    }
+        .file-pick {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            border: 1.5px dashed rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 14px 16px;
+            background: var(--surface2);
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            color: var(--muted);
+            transition: border-color 0.15s, background 0.15s;
+        }
 
-    .cd-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
-      color: var(--muted); margin-top: 6px;
-    }
+        .file-pick:hover {
+            border-color: var(--yellow);
+            background: rgba(245, 197, 24, 0.04);
+            color: var(--text);
+        }
 
-    /* ---- SIDEBAR ---- */
-    .sidebar-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 22px;
-    }
+        .file-pick-icon {
+            font-size: 20px;
+        }
 
-    .sidebar-card + .sidebar-card { margin-top: 14px; }
+        /* ---- PROGRESS ---- */
+        .prog-wrap {
+            display: none;
+            height: 3px;
+            background: var(--surface2);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 14px;
+        }
 
-    .contributor-tag {
-      display: inline-block;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      padding: 5px 12px;
-      margin: 4px 4px 0 0;
-      font-family: 'DM Mono', monospace;
-      font-size: 11px; color: var(--muted);
-    }
+        .prog-fill {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, var(--yellow), var(--yellow2));
+            border-radius: 999px;
+            transition: width 0.3s ease;
+        }
 
-    .sidebar-info {
-      font-size: 14px; color: var(--muted); line-height: 1.7;
-    }
+        .prog-text {
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
 
-    /* ---- GALLERY ---- */
-    #gallery-section { margin-top: 48px; }
+        /* ---- COUNTDOWN ---- */
+        .countdown-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            margin-top: 16px;
+            position: relative;
+            overflow: hidden;
+        }
 
-    .divider {
-      border: none; border-top: 1px solid var(--border);
-      margin-bottom: 32px;
-    }
+        .countdown-card::before {
+            content: '';
+            position: absolute;
+            bottom: -40px;
+            right: -40px;
+            width: 160px;
+            height: 160px;
+            background: radial-gradient(circle, var(--glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
 
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 14px;
-    }
+        .cd-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
 
-    .memory-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s;
-    }
-    .memory-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
-      border-color: rgba(245,197,24,0.3);
-    }
+        .cd-unit {
+            text-align: center;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 8px 12px;
+        }
 
-    .memory-card img {
-      width: 100%; height: 190px; object-fit: cover; display: block;
-    }
+        .cd-num {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 40px;
+            line-height: 1;
+            color: var(--yellow);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.02em;
+        }
 
-    .memory-card-body { padding: 14px 16px 16px; }
+        .cd-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-top: 6px;
+        }
 
-    .memory-name {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 20px; letter-spacing: 0.02em; color: var(--text);
-    }
+        /* ---- SIDEBAR ---- */
+        .sidebar-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 22px;
+        }
 
-    .memory-note {
-      font-size: 13px; color: var(--muted);
-      font-style: italic; margin-top: 4px; line-height: 1.5;
-    }
+        .sidebar-card+.sidebar-card {
+            margin-top: 14px;
+        }
 
-    /* ---- LIGHTBOX ---- */
-    #lightbox {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.85);
-      display: none; align-items: center; justify-content: center;
-      z-index: 100;
-      backdrop-filter: blur(8px);
-    }
+        .contributor-tag {
+            display: inline-block;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            padding: 5px 12px;
+            margin: 4px 4px 0 0;
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: var(--muted);
+        }
 
-    .lightbox-inner {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      max-width: 780px; width: calc(100% - 40px);
-      max-height: 90vh; overflow-y: auto;
-      box-shadow: 0 32px 80px rgba(0,0,0,0.7);
-    }
+        .sidebar-info {
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
 
-    .lightbox-inner img {
-      width: 100%; display: block; border-radius: 20px 20px 0 0;
-      max-height: 58vh; object-fit: cover;
-    }
+        /* ---- GALLERY ---- */
+        #gallery-section {
+            margin-top: 48px;
+        }
 
-    .lightbox-body {
-      padding: 22px 26px;
-      display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
-    }
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin-bottom: 32px;
+        }
 
-    #lightName {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 30px; letter-spacing: 0.02em;
-    }
-    #lightNote { font-size: 15px; color: var(--muted); font-style: italic; margin-top: 6px; line-height: 1.6; }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 14px;
+        }
 
-    /* ---- FOOTER ---- */
-    footer {
-      margin-top: 60px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border);
-      display: flex; justify-content: space-between; align-items: center;
-    }
+        .memory-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s;
+        }
 
-    .footer-text {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px; color: var(--muted); letter-spacing: 0.08em;
-    }
+        .memory-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+            border-color: rgba(245, 197, 24, 0.3);
+        }
 
-    .footer-dot { width: 6px; height: 6px; background: var(--yellow); border-radius: 50%; }
+        .memory-card img {
+            width: 100%;
+            height: 190px;
+            object-fit: cover;
+            display: block;
+        }
 
-    /* ---- ANIMATE ---- */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .fade-up { animation: fadeUp 0.5s cubic-bezier(.22,.68,0,1.2) both; }
-    .delay-1 { animation-delay: 0.08s; }
-    .delay-2 { animation-delay: 0.16s; }
-    .delay-3 { animation-delay: 0.24s; }
-  </style>
+        .memory-card-body {
+            padding: 14px 16px 16px;
+        }
+
+        .memory-name {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 20px;
+            letter-spacing: 0.02em;
+            color: var(--text);
+        }
+
+        .memory-note {
+            font-size: 13px;
+            color: var(--muted);
+            font-style: italic;
+            margin-top: 4px;
+            line-height: 1.5;
+        }
+
+        /* ---- LIGHTBOX ---- */
+        #lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+        }
+
+        .lightbox-inner {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            max-width: 780px;
+            width: calc(100% - 40px);
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7);
+        }
+
+        .lightbox-inner img {
+            width: 100%;
+            display: block;
+            border-radius: 20px 20px 0 0;
+            max-height: 58vh;
+            object-fit: cover;
+        }
+
+        .lightbox-body {
+            padding: 22px 26px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        #lightName {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 30px;
+            letter-spacing: 0.02em;
+        }
+
+        #lightNote {
+            font-size: 15px;
+            color: var(--muted);
+            font-style: italic;
+            margin-top: 6px;
+            line-height: 1.6;
+        }
+
+        /* ---- FOOTER ---- */
+        footer {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-text {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 0.08em;
+        }
+
+        .footer-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--yellow);
+            border-radius: 50%;
+        }
+
+        /* ---- ANIMATE ---- */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-up {
+            animation: fadeUp 0.5s cubic-bezier(.22, .68, 0, 1.2) both;
+        }
+
+        .delay-1 {
+            animation-delay: 0.08s;
+        }
+
+        .delay-2 {
+            animation-delay: 0.16s;
+        }
+
+        .delay-3 {
+            animation-delay: 0.24s;
+        }
+    </style>
 </head>
+
 <body>
-<div class="wrap">
+    <div class="wrap">
 
-  <!-- HEADER -->
-  <header class="fade-up">
-    <div class="logo-block">
-      <div class="logo-year">Lise — 2026</div>
-      <h1>10-H<br><span>Hatıra Duvarı</span></h1>
-    </div>
-    <div class="header-right">
-      <div class="header-tagline">
-        Anlarını kilitle,<br>birlikte aç.
-      </div>
-      <div id="auth-area">
-        <button class="btn btn-header" onclick="document.getElementById('login-screen').scrollIntoView({behavior:'smooth'})">Giriş Yap →</button>
-      </div>
-    </div>
-  </header>
-
-  <!-- LOGIN -->
-  <div id="login-screen" class="login-card fade-up delay-1">
-    <h2>Kasaya Giriş</h2>
-    <div class="subtitle">Sadece sınıf için</div>
-    <form id="loginForm">
-      <fieldset>
-        <div class="field">
-          <label for="lUser">Kullanıcı Adı</label>
-          <input id="lUser" type="text" placeholder="egm1141" required autocomplete="username" />
-        </div>
-        <div class="field">
-          <label for="lPass">Şifre</label>
-          <input id="lPass" type="password" placeholder="••••" required autocomplete="current-password" />
-        </div>
-      </fieldset>
-      <div id="lError" class="error-msg">Kullanıcı adı veya şifre hatalı.</div>
-      <div class="form-actions">
-        <button type="submit" class="btn btn-fill">Giriş</button>
-        <button type="button" class="btn btn-outline" onclick="logout()">Çıkış</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- MAIN APP -->
-  <div id="main-app">
-    <div class="app-grid">
-
-      <!-- LEFT -->
-      <div>
-        <div class="memory-form-wrap fade-up">
-          <div class="section-label">Yeni Anı</div>
-          <h2 class="section-title">Anını Kilitle</h2>
-          <form id="memoryForm">
-            <fieldset style="gap:16px;display:grid">
-              <div class="field">
-                <label for="mName">Adın</label>
-                <input id="mName" type="text" placeholder="Egemen" required />
-              </div>
-              <div class="field">
-                <label for="mNote">Not <span style="font-size:9px;opacity:0.5">(isteğe bağlı)</span></label>
-                <textarea id="mNote" rows="3" placeholder="Bırakmak istediğin küçük bir not…"></textarea>
-              </div>
-              <div class="field">
-                <label for="mFile">Fotoğraf</label>
-                <label class="file-pick" for="mFile" id="fileLabel">
-                  <span class="file-pick-icon">📷</span>
-                  <span id="fileLabelText">Fotoğraf seç veya sürükle</span>
-                </label>
-                <input id="mFile" type="file" accept="image/*" style="display:none" />
-              </div>
-            </fieldset>
-            <div class="prog-wrap" id="progWrap"><div class="prog-fill" id="progFill"></div></div>
-            <div class="prog-text" id="progText"></div>
-            <div class="form-actions" style="margin-top:20px">
-              <button type="submit" class="btn btn-fill">Anıyı Kilitle 🔒</button>
-              <button type="button" class="btn btn-outline" onclick="document.getElementById('memoryForm').reset();document.getElementById('fileLabelText').innerText='Fotoğraf seç veya sürükle'">Temizle</button>
+        <!-- HEADER -->
+        <header class="fade-up">
+            <div class="logo-block">
+                <div class="logo-year">Lise — 2026</div>
+                <h1>10-H<br><span>Hatıra Duvarı</span></h1>
             </div>
-          </form>
-        </div>
-
-        <!-- COUNTDOWN -->
-        <div id="countdown-section" class="countdown-card fade-up delay-2">
-          <div class="section-label">Açılışa Kalan</div>
-          <div class="cd-grid">
-            <div class="cd-unit"><div class="cd-num" id="days">00</div><div class="cd-label">Gün</div></div>
-            <div class="cd-unit"><div class="cd-num" id="hours">00</div><div class="cd-label">Saat</div></div>
-            <div class="cd-unit"><div class="cd-num" id="minutes">00</div><div class="cd-label">Dakika</div></div>
-            <div class="cd-unit"><div class="cd-num" id="seconds">00</div><div class="cd-label">Saniye</div></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SIDEBAR -->
-      <aside>
-        <div class="sidebar-card fade-up delay-2">
-          <div class="section-label">Katılımcılar <span id="contributor-count" style="color:var(--rust)">0</span></div>
-          <div id="contributor-section">
-            <div id="contributor-list">
-              <p class="sidebar-info" style="font-style:italic;font-size:13px">Henüz anı eklenmemiş. İlk sen ol ✨</p>
+            <div class="header-right">
+                <div class="header-tagline">
+                    Anlarını kilitle,<br>birlikte aç.
+                </div>
+                <div id="auth-area">
+                    <button class="btn btn-header"
+                        onclick="document.getElementById('login-screen').scrollIntoView({behavior:'smooth'})">Giriş Yap
+                        →</button>
+                </div>
             </div>
-          </div>
+        </header>
+
+        <!-- LOGIN -->
+        <div id="login-screen" class="login-card fade-up delay-1">
+            <h2>Kasaya Giriş</h2>
+            <div class="subtitle">Sadece sınıf için</div>
+            <form id="loginForm">
+                <fieldset>
+                    <div class="field">
+                        <label for="lUser">Kullanıcı Adı</label>
+                        <input id="lUser" type="text" placeholder="egm1141" required autocomplete="username" />
+                    </div>
+                    <div class="field">
+                        <label for="lPass">Şifre</label>
+                        <input id="lPass" type="password" placeholder="••••" required autocomplete="current-password" />
+                    </div>
+                </fieldset>
+                <div id="lError" class="error-msg">Kullanıcı adı veya şifre hatalı.</div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-fill">Giriş</button>
+                    <button type="button" class="btn btn-outline" onclick="logout()">Çıkış</button>
+                </div>
+            </form>
         </div>
 
-        <div class="sidebar-card fade-up delay-3">
-          <div class="section-label">Bilgi</div>
-          <p class="sidebar-info">
-            Anılar bu cihazda saklanır.<br><br>
-            Belirlenen saate kadar galeri kilitli kalır.
-          </p>
+        <!-- MAIN APP -->
+        <div id="main-app">
+            <div class="app-grid">
+
+                <!-- LEFT -->
+                <div>
+                    <div class="memory-form-wrap fade-up">
+                        <div class="section-label">Yeni Anı</div>
+                        <h2 class="section-title">Anını Kilitle</h2>
+                        <form id="memoryForm">
+                            <fieldset style="gap:16px;display:grid">
+                                <div class="field">
+                                    <label for="mName">Adın</label>
+                                    <input id="mName" type="text" placeholder="Egemen" required />
+                                </div>
+                                <div class="field">
+                                    <label for="mNote">Not <span style="font-size:9px;opacity:0.5">(isteğe
+                                            bağlı)</span></label>
+                                    <textarea id="mNote" rows="3"
+                                        placeholder="Bırakmak istediğin küçük bir not…"></textarea>
+                                </div>
+                                <div class="field">
+                                    <label for="mFile">Fotoğraf</label>
+                                    <label class="file-pick" for="mFile" id="fileLabel">
+                                        <span class="file-pick-icon">📷</span>
+                                        <span id="fileLabelText">Fotoğraf seç veya sürükle</span>
+                                    </label>
+                                    <input id="mFile" type="file" accept="image/*" style="display:none" />
+                                </div>
+                            </fieldset>
+                            <div class="prog-wrap" id="progWrap">
+                                <div class="prog-fill" id="progFill"></div>
+                            </div>
+                            <div class="prog-text" id="progText"></div>
+                            <div class="form-actions" style="margin-top:20px">
+                                <button type="submit" class="btn btn-fill">Anıyı Kilitle 🔒</button>
+                                <button type="button" class="btn btn-outline"
+                                    onclick="document.getElementById('memoryForm').reset();document.getElementById('fileLabelText').innerText='Fotoğraf seç veya sürükle'">Temizle</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- COUNTDOWN -->
+                    <div id="countdown-section" class="countdown-card fade-up delay-2">
+                        <div class="section-label">Açılışa Kalan</div>
+                        <div class="cd-grid">
+                            <div class="cd-unit">
+                                <div class="cd-num" id="days">00</div>
+                                <div class="cd-label">Gün</div>
+                            </div>
+                            <div class="cd-unit">
+                                <div class="cd-num" id="hours">00</div>
+                                <div class="cd-label">Saat</div>
+                            </div>
+                            <div class="cd-unit">
+                                <div class="cd-num" id="minutes">00</div>
+                                <div class="cd-label">Dakika</div>
+                            </div>
+                            <div class="cd-unit">
+                                <div class="cd-num" id="seconds">00</div>
+                                <div class="cd-label">Saniye</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SIDEBAR -->
+                <aside>
+                    <div class="sidebar-card fade-up delay-2">
+                        <div class="section-label">Katılımcılar <span id="contributor-count"
+                                style="color:var(--rust)">0</span></div>
+                        <div id="contributor-section">
+                            <div id="contributor-list">
+                                <p class="sidebar-info" style="font-style:italic;font-size:13px">Henüz anı eklenmemiş.
+                                    İlk sen ol ✨</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-card fade-up delay-3">
+                        <div class="section-label">Bilgi</div>
+                        <p class="sidebar-info">
+                            Anılar bu cihazda saklanır.<br><br>
+                            Belirlenen saate kadar galeri kilitli kalır.
+                        </p>
+                    </div>
+                </aside>
+            </div>
+
+            <!-- GALLERY -->
+            <section id="gallery-section" style="display:none">
+                <hr class="divider">
+                <div class="section-label">Galeri</div>
+                <h2 class="section-title">Hepimizin Anıları</h2>
+                <div id="gallery" class="gallery"></div>
+            </section>
         </div>
-      </aside>
+
+        <footer>
+            <span class="footer-text">10-H · Hatıra Duvarı · 2026</span>
+            <div class="footer-dot"></div>
+            <span class="footer-text">Hazır</span>
+        </footer>
     </div>
 
-    <!-- GALLERY -->
-    <section id="gallery-section" style="display:none">
-      <hr class="divider">
-      <div class="section-label">Galeri</div>
-      <h2 class="section-title">Hepimizin Anıları</h2>
-      <div id="gallery" class="gallery"></div>
-    </section>
-  </div>
-
-  <footer>
-    <span class="footer-text">10-H · Hatıra Duvarı · 2026</span>
-    <div class="footer-dot"></div>
-    <span class="footer-text">Hazır</span>
-  </footer>
-</div>
-
-<!-- LIGHTBOX -->
-<div id="lightbox" onclick="closeLightbox()">
-  <div class="lightbox-inner" onclick="event.stopPropagation()">
-    <img id="lightImg" src="" alt="" />
-    <div class="lightbox-body">
-      <div>
-        <div id="lightName"></div>
-        <div id="lightNote"></div>
-      </div>
-      <button class="btn btn-fill" onclick="closeLightbox()">Kapat</button>
+    <!-- LIGHTBOX -->
+    <div id="lightbox" onclick="closeLightbox()">
+        <div class="lightbox-inner" onclick="event.stopPropagation()">
+            <img id="lightImg" src="" alt="" />
+            <div class="lightbox-body">
+                <div>
+                    <div id="lightName"></div>
+                    <div id="lightNote"></div>
+                </div>
+                <button class="btn btn-fill" onclick="closeLightbox()">Kapat</button>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script>
-  // ── SUPABASE ─────────────────────────────────────────
-  const { createClient } = supabase;
-  const sb = createClient(
-    'https://zyewinfmqhdwrooypyhp.supabase.co',
-    'sb_publishable_-YUOT2rrpDWBk7K272KjkA_2plfNODm'
-  );
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script>
+        // ── SUPABASE ─────────────────────────────────────────
+        const { createClient } = supabase;
+        const sb = createClient(
+            'https://zyewinfmqhdwrooypyhp.supabase.co',
+            'sb_publishable_-YUOT2rrpDWBk7K272KjkA_2plfNODm'
+        );
 
-  // ── AUTH ─────────────────────────────────────────────
-  const VALID_USERS = { "egm1141": "1141", "omer": "1311", "10h": "2026" };
+        // ── AUTH ─────────────────────────────────────────────
+        const VALID_USERS = { "egm1141": "1141", "omer": "1311", "10h": "2026" };
 
-  function login(user, pass) {
-    const u = user.toLowerCase().trim();
-    if (VALID_USERS[u] === pass) {
-      localStorage.setItem('10h_session', u);
-      showApp(u);
-    } else {
-      document.getElementById('lError').style.display = 'block';
-    }
-  }
+        function login(user, pass) {
+            const u = user.toLowerCase().trim();
+            if (VALID_USERS[u] === pass) {
+                localStorage.setItem('10h_session', u);
+                showApp(u);
+            } else {
+                document.getElementById('lError').style.display = 'block';
+            }
+        }
 
-  function logout() {
-    localStorage.removeItem('10h_session');
-    location.reload();
-  }
+        function logout() {
+            localStorage.removeItem('10h_session');
+            location.reload();
+        }
 
-  function showApp(name) {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('main-app').style.display = 'block';
-    document.getElementById('mName').value = name.charAt(0).toUpperCase() + name.slice(1);
-    loadContributors();
-  }
-
-  const savedSession = localStorage.getItem('10h_session');
-  if (savedSession) showApp(savedSession);
-
-  document.getElementById('loginForm').addEventListener('submit', e => {
-    e.preventDefault();
-    login(document.getElementById('lUser').value, document.getElementById('lPass').value);
-  });
-
-  // ── FILE PICK ────────────────────────────────────────
-  document.getElementById('mFile').addEventListener('change', e => {
-    const name = e.target.files[0]?.name;
-    document.getElementById('fileLabelText').innerText = name ? `✅ ${name}` : 'Fotoğraf seç veya sürükle';
-  });
-
-  // ── MEMORY FORM SUBMIT ───────────────────────────────
-  document.getElementById('memoryForm').addEventListener('submit', async e => {
-    e.preventDefault();
-    const file = document.getElementById('mFile').files[0];
-    const name = document.getElementById('mName').value.trim();
-    const note = document.getElementById('mNote').value.trim();
-    if (!file || !name) return;
-
-    const wrap = document.getElementById('progWrap');
-    const fill = document.getElementById('progFill');
-    const txt  = document.getElementById('progText');
-    wrap.style.display = 'block';
-    fill.style.width = '20%';
-    txt.innerText = 'Yükleniyor…';
-
-    try {
-      // 1. Storage'a yükle
-      const ext      = file.name.split('.').pop();
-      const filePath = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-
-      const { error: upErr } = await sb.storage
-        .from('photos')
-        .upload(filePath, file, { cacheControl: '3600', upsert: false });
-      if (upErr) throw upErr;
-
-      fill.style.width = '65%';
-      txt.innerText = 'Kaydediliyor…';
-
-      // 2. Public URL al
-      const { data: pubData } = sb.storage.from('photos').getPublicUrl(filePath);
-      const photoUrl = pubData.publicUrl;
-
-      // 3. DB'ye kaydet
-      const { error: insErr } = await sb
-        .from('10h_memories')
-        .insert([{ name, note, photo: photoUrl, date: new Date().toISOString() }]);
-      if (insErr) throw insErr;
-
-      fill.style.width = '100%';
-      txt.innerText = 'Tamamlandı!';
-
-      try { confetti({ particleCount: 160, spread: 80, origin: { y: 0.55 } }); } catch(_) {}
-      alert('ANIN KASAYA EKLENDİ! 🔒');
-
-      document.getElementById('memoryForm').reset();
-      document.getElementById('fileLabelText').innerText = 'Fotoğraf seç veya sürükle';
-      setTimeout(() => { wrap.style.display = 'none'; }, 600);
-
-      loadContributors();
-      if (isReveal) loadAndRenderGallery();
-
-    } catch (err) {
-      alert('Hata: ' + (err.message || JSON.stringify(err)));
-      wrap.style.display = 'none';
-      console.error(err);
-    }
-  });
-
-  // ── TARGET DATE (Istanbul 21:10) ─────────────────────
-  (function(){
-    const tz = 'Europe/Istanbul';
-    const now = new Date();
-    const parts = new Intl.DateTimeFormat('en-GB', {
-      timeZone: tz, year:'numeric', month:'numeric', day:'numeric',
-      hour:'numeric', minute:'numeric', second:'numeric', hour12: false
-    }).formatToParts(now).reduce((a, p) => { if (p.type !== 'literal') a[p.type] = p.value; return a; }, {});
-    const y = Number(parts.year), mo = Number(parts.month), d = Number(parts.day), h = 21, mm = 35;
-    const start = Date.UTC(y, mo-1, d, h, mm, 0) - 12*3600*1000;
-    for (let off = 0; off <= 24*3600*1000; off += 1000) {
-      const c = new Date(start + off);
-      const cp = new Intl.DateTimeFormat('en-GB', {
-        timeZone: tz, year:'numeric', month:'numeric', day:'numeric',
-        hour:'numeric', minute:'numeric', second:'numeric', hour12: false
-      }).formatToParts(c).reduce((a, p) => { if (p.type !== 'literal') a[p.type] = p.value; return a; }, {});
-      if (Number(cp.year)===y && Number(cp.month)===mo && Number(cp.day)===d &&
-          Number(cp.hour)===h && Number(cp.minute)===mm) {
-        window.__TARGET_DATE_MS = c.getTime(); break;
-      }
-    }
-    if (!window.__TARGET_DATE_MS) window.__TARGET_DATE_MS = new Date(y, mo-1, d, h, mm, 0).getTime();
-  })();
-
-  const targetDate = window.__TARGET_DATE_MS;
-  let isReveal = false;
-
-  function updateTimer() {
-    const rem = targetDate - Date.now();
-    const isTest = new URLSearchParams(location.search).get('test') === 'true';
-    if (rem <= 0 || isTest) {
-      if (!isReveal) {
-        isReveal = true;
-        document.getElementById('countdown-section').style.display = 'none';
-        document.getElementById('gallery-section').style.display = 'block';
-        try { confetti({ particleCount: 300, spread: 160, origin: { y: 0.5 } }); } catch(_) {}
-        loadAndRenderGallery();
-        // Realtime subscription
-        sb.channel('10h_memories_channel')
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: '10h_memories' }, () => {
-            loadAndRenderGallery();
+        function showApp(name) {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            document.getElementById('mName').value = name.charAt(0).toUpperCase() + name.slice(1);
             loadContributors();
-          })
-          .subscribe();
-      }
-      return;
-    }
-    const dd = Math.floor(rem / (1000*60*60*24));
-    const hh = Math.floor((rem % (1000*60*60*24)) / (1000*60*60));
-    const mm2 = Math.floor((rem % (1000*60*60)) / (1000*60));
-    const ss = Math.floor((rem % (1000*60)) / 1000);
-    document.getElementById('days').innerText    = String(dd).padStart(2,'0');
-    document.getElementById('hours').innerText   = String(hh).padStart(2,'0');
-    document.getElementById('minutes').innerText = String(mm2).padStart(2,'0');
-    document.getElementById('seconds').innerText = String(ss).padStart(2,'0');
-  }
+        }
 
-  // ── GALLERY ──────────────────────────────────────────
-  async function loadAndRenderGallery() {
-    const { data, error } = await sb
-      .from('10h_memories')
-      .select('*')
-      .order('date', { ascending: false });
-    if (error) { console.error(error); return; }
-    renderGallery(data || []);
-  }
+        const savedSession = localStorage.getItem('10h_session');
+        if (savedSession) showApp(savedSession);
 
-  let galleryData = [];
+        document.getElementById('loginForm').addEventListener('submit', e => {
+            e.preventDefault();
+            login(document.getElementById('lUser').value, document.getElementById('lPass').value);
+        });
 
-  function renderGallery(list) {
-    galleryData = list;
-    const el = document.getElementById('gallery');
-    if (!list.length) {
-      el.innerHTML = `<p style="color:var(--muted);font-style:italic;font-size:15px">Henüz hiç anı eklenmemiş.</p>`;
-      return;
-    }
-    el.innerHTML = list.map((m, i) => `
-      <div class="memory-card" style="animation:fadeUp 0.4s ${i*0.06}s both" onclick="openLightbox(${i})">
+        // ── FILE PICK ────────────────────────────────────────
+        document.getElementById('mFile').addEventListener('change', e => {
+            const name = e.target.files[0]?.name;
+            document.getElementById('fileLabelText').innerText = name ? `✅ ${name}` : 'Fotoğraf seç veya sürükle';
+        });
+
+        // ── MEMORY FORM SUBMIT ───────────────────────────────
+        document.getElementById('memoryForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            const file = document.getElementById('mFile').files[0];
+            const name = document.getElementById('mName').value.trim();
+            const note = document.getElementById('mNote').value.trim();
+            if (!file || !name) return;
+
+            const wrap = document.getElementById('progWrap');
+            const fill = document.getElementById('progFill');
+            const txt = document.getElementById('progText');
+            wrap.style.display = 'block';
+            fill.style.width = '20%';
+            txt.innerText = 'Yükleniyor…';
+
+            try {
+                // 1. Storage'a yükle
+                const ext = file.name.split('.').pop();
+                const filePath = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+
+                const { error: upErr } = await sb.storage
+                    .from('photos')
+                    .upload(filePath, file, { cacheControl: '3600', upsert: false });
+                if (upErr) throw upErr;
+
+                fill.style.width = '65%';
+                txt.innerText = 'Kaydediliyor…';
+
+                // 2. Public URL al
+                const { data: pubData } = sb.storage.from('photos').getPublicUrl(filePath);
+                const photoUrl = pubData.publicUrl;
+
+                // 3. DB'ye kaydet
+                const { error: insErr } = await sb
+                    .from('10h_memories')
+                    .insert([{ name, note, photo: photoUrl, date: new Date().toISOString() }]);
+                if (insErr) throw insErr;
+
+                fill.style.width = '100%';
+                txt.innerText = 'Tamamlandı!';
+
+                try { confetti({ particleCount: 160, spread: 80, origin: { y: 0.55 } }); } catch (_) { }
+                alert('ANIN KASAYA EKLENDİ! 🔒');
+
+                document.getElementById('memoryForm').reset();
+                document.getElementById('fileLabelText').innerText = 'Fotoğraf seç veya sürükle';
+                setTimeout(() => { wrap.style.display = 'none'; }, 600);
+
+                loadContributors();
+                if (isReveal) loadAndRenderGallery();
+
+            } catch (err) {
+                alert('Hata: ' + (err.message || JSON.stringify(err)));
+                wrap.style.display = 'none';
+                console.error(err);
+            }
+        });
+
+        // ── TARGET DATE (26 Haziran 2026 00:00 Istanbul) ────────
+        (function () {
+            // Istanbul saatiyle 26 Haziran 2026 00:00
+            window.__TARGET_DATE_MS = new Date('2026-06-26T00:00:00+03:00').getTime();
+        })();
+
+        const targetDate = window.__TARGET_DATE_MS;
+        let isReveal = false;
+
+        function updateTimer() {
+            const rem = targetDate - Date.now();
+            const isTest = new URLSearchParams(location.search).get('test') === 'true';
+            if (rem <= 0 || isTest) {
+                if (!isReveal) {
+                    isReveal = true;
+                    document.getElementById('countdown-section').style.display = 'none';
+                    document.getElementById('gallery-section').style.display = 'block';
+                    try { confetti({ particleCount: 300, spread: 160, origin: { y: 0.5 } }); } catch (_) { }
+                    loadAndRenderGallery();
+                    // Realtime subscription
+                    sb.channel('10h_memories_channel')
+                        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: '10h_memories' }, () => {
+                            loadAndRenderGallery();
+                            loadContributors();
+                        })
+                        .subscribe();
+                }
+                return;
+            }
+            const dd = Math.floor(rem / (1000 * 60 * 60 * 24));
+            const hh = Math.floor((rem % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const mm2 = Math.floor((rem % (1000 * 60 * 60)) / (1000 * 60));
+            const ss = Math.floor((rem % (1000 * 60)) / 1000);
+            document.getElementById('days').innerText = String(dd).padStart(2, '0');
+            document.getElementById('hours').innerText = String(hh).padStart(2, '0');
+            document.getElementById('minutes').innerText = String(mm2).padStart(2, '0');
+            document.getElementById('seconds').innerText = String(ss).padStart(2, '0');
+        }
+
+        // ── GALLERY ──────────────────────────────────────────
+        async function loadAndRenderGallery() {
+            const { data, error } = await sb
+                .from('10h_memories')
+                .select('*')
+                .order('date', { ascending: false });
+            if (error) { console.error(error); return; }
+            renderGallery(data || []);
+        }
+
+        let galleryData = [];
+
+        function renderGallery(list) {
+            galleryData = list;
+            const el = document.getElementById('gallery');
+            if (!list.length) {
+                el.innerHTML = `<p style="color:var(--muted);font-style:italic;font-size:15px">Henüz hiç anı eklenmemiş.</p>`;
+                return;
+            }
+            el.innerHTML = list.map((m, i) => `
+      <div class="memory-card" style="animation:fadeUp 0.4s ${i * 0.06}s both" onclick="openLightbox(${i})">
         <img src="${m.photo}" loading="lazy" />
         <div class="memory-card-body">
           <div class="memory-name">${escHtml(m.name)}</div>
@@ -748,41 +938,42 @@
         </div>
       </div>
     `).join('');
-  }
+        }
 
-  // ── CONTRIBUTORS ─────────────────────────────────────
-  async function loadContributors() {
-    const { data, error } = await sb.from('10h_memories').select('name');
-    const names = [...new Set((data || []).map(d => d.name))];
-    document.getElementById('contributor-count').innerText = names.length;
-    const container = document.getElementById('contributor-list');
-    if (!names.length) {
-      container.innerHTML = `<p class="sidebar-info" style="font-style:italic;font-size:13px">Henüz anı eklenmemiş. İlk sen ol ✨</p>`;
-      return;
-    }
-    container.innerHTML = names.map(n => `<span class="contributor-tag">✅ ${escHtml(n)}</span>`).join('');
-  }
+        // ── CONTRIBUTORS ─────────────────────────────────────
+        async function loadContributors() {
+            const { data, error } = await sb.from('10h_memories').select('name');
+            const names = [...new Set((data || []).map(d => d.name))];
+            document.getElementById('contributor-count').innerText = names.length;
+            const container = document.getElementById('contributor-list');
+            if (!names.length) {
+                container.innerHTML = `<p class="sidebar-info" style="font-style:italic;font-size:13px">Henüz anı eklenmemiş. İlk sen ol ✨</p>`;
+                return;
+            }
+            container.innerHTML = names.map(n => `<span class="contributor-tag">✅ ${escHtml(n)}</span>`).join('');
+        }
 
-  // ── LIGHTBOX ─────────────────────────────────────────
-  function openLightbox(i) {
-    const m = galleryData[i];
-    if (!m) return;
-    document.getElementById('lightImg').src = m.photo;
-    document.getElementById('lightName').innerText = m.name;
-    document.getElementById('lightNote').innerText = m.note || 'Lise hayatına dair ufak bir hatıra.';
-    document.getElementById('lightbox').style.display = 'flex';
-  }
-  window.openLightbox = openLightbox;
-  window.closeLightbox = () => { document.getElementById('lightbox').style.display = 'none'; };
+        // ── LIGHTBOX ─────────────────────────────────────────
+        function openLightbox(i) {
+            const m = galleryData[i];
+            if (!m) return;
+            document.getElementById('lightImg').src = m.photo;
+            document.getElementById('lightName').innerText = m.name;
+            document.getElementById('lightNote').innerText = m.note || 'Lise hayatına dair ufak bir hatıra.';
+            document.getElementById('lightbox').style.display = 'flex';
+        }
+        window.openLightbox = openLightbox;
+        window.closeLightbox = () => { document.getElementById('lightbox').style.display = 'none'; };
 
-  // ── UTILS ────────────────────────────────────────────
-  function escHtml(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  }
+        // ── UTILS ────────────────────────────────────────────
+        function escHtml(str) {
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
 
-  // ── INIT ─────────────────────────────────────────────
-  setInterval(updateTimer, 1000);
-  updateTimer();
-</script>
+        // ── INIT ─────────────────────────────────────────────
+        setInterval(updateTimer, 1000);
+        updateTimer();
+    </script>
 </body>
+
 </html>
