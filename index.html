@@ -1,788 +1,378 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tr">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>10-H Sınıfı | Premium Hatıra Kasası</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Syne:wght@400;700;800&display=swap"
-        rel="stylesheet" />
-
-    <!-- Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-    <!-- Firebase SDK & App Logic -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDVC44SWG6p9e0F2JNWc66zMJJTXO7TF98",
-            authDomain: "konu-anlat.firebaseapp.com",
-            projectId: "konu-anlat",
-            storageBucket: "konu-anlat.firebasestorage.app",
-            messagingSenderId: "283509599639",
-            appId: "1:283509599639:web:05578aa68fea8243d8a8d2",
-            measurementId: "G-E0SZZ0M7WD"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
-
-        // --- AUTH LOGIC ---
-        const VALID_USERS = {
-            "egm1141": "1141",
-            "omer": "1311",
-            "10h": "2026"
-        };
-
-        window.login = (user, pass) => {
-            const u = user.toLowerCase().trim();
-            if (VALID_USERS[u] === pass) {
-                localStorage.setItem('10h_vault_session', u);
-                showApp(u);
-            } else {
-                document.getElementById('lError').style.display = 'block';
-            }
-        };
-
-        window.logout = () => {
-            localStorage.removeItem('10h_vault_session');
-            window.location.reload();
-        };
-
-        function showApp(name) {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
-            document.getElementById('mName').value = name.toUpperCase();
-        }
-
-        const saved = localStorage.getItem('10h_vault_session');
-        if (saved) showApp(saved);
-
-        document.getElementById('loginForm').addEventListener('submit', e => {
-            e.preventDefault();
-            window.login(document.getElementById('lUser').value, document.getElementById('lPass').value);
-        });
-
-        // --- UPLOAD LOGIC ---
-        document.getElementById('mFile').addEventListener('change', e => {
-            const fileName = e.target.files[0]?.name;
-            document.getElementById('fileLabel').innerHTML = fileName ? `✅ ${fileName}` : `🖼️ Fotoğraf Seç veya Sürükle`;
-        });
-
-        document.getElementById('memoryForm').addEventListener('submit', async e => {
-            e.preventDefault();
-            const file = document.getElementById('mFile').files[0];
-            const name = document.getElementById('mName').value;
-            const note = document.getElementById('mNote').value;
-            if (!file) return;
-
-            const wrap = document.getElementById('progWrap'), fill = document.getElementById('progFill'), txt = document.getElementById('progText');
-            wrap.style.display = 'block';
-
-            const sRef = ref(storage, `10h_premium/${Date.now()}_${name}_${file.name}`);
-            const task = uploadBytesResumable(sRef, file);
-
-            task.on('state_changed',
-                s => {
-                    const p = Math.round((s.bytesTransferred / s.totalBytes) * 100);
-                    fill.style.width = p + '%'; txt.innerText = p + '%';
-                },
-                e => alert(e.message),
-                async () => {
-                    const url = await getDownloadURL(task.snapshot.ref);
-                    await addDoc(collection(db, '10h_memories'), {
-                        name, note, photo: url, date: new Date().toISOString()
-                    });
-                    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                    alert('ANIN KASAYA EKLENDİ! 🔒');
-                    document.getElementById('memoryForm').reset();
-                    document.getElementById('fileLabel').innerHTML = '🖼️ Fotoğraf Seç veya Sürükle';
-                    wrap.style.display = 'none';
-                }
-            );
-        });
-
-        // --- REVEAL & CONTENT ---
-        // 🔧 TEST: Bugün 25 Mart 2026 saat 20:05'te açılır
-        const targetDate = new Date('March 25, 2026 20:05:00').getTime();
-        let isReveal = false;
-
-        function updateTimer() {
-            const now = new Date().getTime(), rem = targetDate - now;
-            const isTest = new URLSearchParams(window.location.search).get('test') === 'true';
-
-            if (rem <= 0 || isTest) {
-                if (!isReveal) {
-                    isReveal = true;
-                    document.getElementById('countdown-section').style.display = 'none';
-                    document.getElementById('gallery-section').style.display = 'block';
-                    document.querySelector('h1').innerHTML = "10-H<br>Hatıra Duvarı";
-                    confetti({ particleCount: 300, spread: 160, origin: { y: 0.5 } });
-                    initGallery();
-                }
-                return;
-            }
-
-            const d = Math.floor(rem / (1000 * 60 * 60 * 24));
-            const h = Math.floor((rem % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const m = Math.floor((rem % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((rem % (1000 * 60)) / 1000);
-
-            document.getElementById('days').innerText = String(d).padStart(2, '0');
-            document.getElementById('hours').innerText = String(h).padStart(2, '0');
-            document.getElementById('minutes').innerText = String(m).padStart(2, '0');
-            document.getElementById('seconds').innerText = String(s).padStart(2, '0');
-        }
-
-        function initGallery() {
-            const q = query(collection(db, '10h_memories'), orderBy('date', 'desc'));
-            onSnapshot(q, (snap) => {
-                const list = snap.docs.map(d => d.data());
-                document.getElementById('gallery').innerHTML = list.map(m => `
-                    <div class="card" onclick="openLightbox('${m.photo}', '${m.name}', '${m.note.replace(/'/g, "\\'")}')">
-                        <img src="${m.photo}" class="card-img" loading="lazy">
-                        <div class="card-info">
-                            <div class="card-name">${m.name}</div>
-                            <div class="card-note">"${m.note || 'Sessiz bir anı...'}"</div>
-                        </div>
-                    </div>
-                `).join('');
-            });
-        }
-
-        function loadContributors() {
-            const q = query(collection(db, '10h_memories'));
-            onSnapshot(q, (snapshot) => {
-                const names = [...new Set(snapshot.docs.map(d => d.data().name))];
-                renderContributors(names);
-            });
-        }
-
-        function renderContributors(names) {
-            const container = document.getElementById('contributor-list');
-            const countEl = document.getElementById('contributor-count');
-            const section = document.getElementById('contributor-section');
-
-            section.style.display = 'block';
-            countEl.innerText = names.length;
-
-            if (!names.length) {
-                container.innerHTML = `<p style="font-size:13px; color:var(--muted); font-style:italic; margin-top:10px;">Henüz anı kilitlenmemiş. İlk sen ol! ✨</p>`;
-                return;
-            }
-
-            container.innerHTML = names.map((n, i) => `<div class="contributor-tag" style="animation-delay: ${i * 0.1}s">✅ ${n}</div>`).join('');
-        }
-
-        // Initialize Everything
-        setInterval(updateTimer, 1000);
-        updateTimer();
-        loadContributors();
-
-        // Lightbox Exports
-        window.openLightbox = (img, name, note) => {
-            document.getElementById('lightImg').src = img;
-            document.getElementById('lightName').innerText = name;
-            document.getElementById('lightNote').innerText = note || "Lise hayatına dair ufak bir hatıra.";
-            document.getElementById('lightbox').style.display = 'flex';
-        };
-        window.closeLightbox = () => { document.getElementById('lightbox').style.display = 'none'; };
-
-    </script>
-
-    <style>
-        :root {
-            --bg: #02020a;
-            --accent: #fcd34d;
-            --accent-rgb: 252, 211, 77;
-            --secondary: #6366f1;
-            --secondary-rgb: 99, 102, 241;
-            --tertiary: #a855f7;
-            --text: #f8fafc;
-            --muted: #64748b;
-            --glass: rgba(255, 255, 255, 0.03);
-            --glass-thick: rgba(255, 255, 255, 0.06);
-            --border: rgba(255, 255, 255, 0.1);
-            --glow-s: radial-gradient(circle at center, var(--accent) 0%, transparent 60%);
-            --font-main: 'Outfit', sans-serif;
-            --font-head: 'Syne', sans-serif;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            cursor: default;
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: var(--font-main);
-            min-height: 100vh;
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* Iridescent Background */
-        .bg-mesh {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            background:
-                radial-gradient(circle at 0% 0%, rgba(var(--secondary-rgb), 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 100% 100%, rgba(var(--accent-rgb), 0.1) 0%, transparent 40%),
-                radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.05) 0%, transparent 50%);
-            animation: meshFloat 20s ease-in-out infinite alternate;
-        }
-
-        @keyframes meshFloat {
-            0% {
-                transform: scale(1) translate(0, 0);
-            }
-
-            100% {
-                transform: scale(1.1) translate(20px, 10px);
-            }
-        }
-
-        .cursor-glow {
-            position: fixed;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle at center, rgba(var(--secondary-rgb), 0.08) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: -1;
-            transform: translate(-50%, -50%);
-            transition: transform 0.1s ease-out;
-        }
-
-        .app {
-            width: 100%;
-            max-width: 1300px;
-            padding: 60px 20px;
-            text-align: center;
-        }
-
-        /* Premium Header */
-        header {
-            margin-bottom: 80px;
-            position: relative;
-        }
-
-        .hero-label {
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 100px;
-            background: rgba(var(--secondary-rgb), 0.1);
-            border: 1px solid rgba(var(--secondary-rgb), 0.2);
-            color: #818cf8;
-            font-weight: 800;
-            font-size: 13px;
-            letter-spacing: 3px;
-            margin-bottom: 24px;
-            animation: slideDown 0.8s backwards;
-        }
-
-        h1 {
-            font-family: var(--font-head);
-            font-size: clamp(48px, 10vw, 100px);
-            font-weight: 800;
-            letter-spacing: -4px;
-            line-height: 0.9;
-            background: linear-gradient(135deg, #fff 0%, #cbd5e1 50%, var(--accent) 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 20px;
-            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.1));
-        }
-
-        /* Auth Screen */
-        #login-screen {
-            position: fixed;
-            inset: 0;
-            z-index: 2000;
-            background: var(--bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .login-card {
-            background: var(--glass-thick);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(50px);
-            padding: 60px 40px;
-            border-radius: 50px;
-            max-width: 480px;
-            width: 100%;
-            box-shadow: 0 50px 100px rgba(0, 0, 0, 0.8), inset 0 0 0 1px var(--border);
-            animation: cardEntrance 1s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes cardEntrance {
-            from {
-                transform: scale(0.8) translateY(40px);
-                opacity: 0;
-            }
-        }
-
-        .login-input {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--border);
-            padding: 20px;
-            border-radius: 20px;
-            color: #fff;
-            font-family: inherit;
-            font-size: 16px;
-            margin-bottom: 16px;
-            transition: 0.3s;
-        }
-
-        .login-input:focus {
-            border-color: var(--accent);
-            background: rgba(var(--accent-rgb), 0.05);
-        }
-
-        .btn {
-            padding: 20px 32px;
-            border: none;
-            border-radius: 20px;
-            font-weight: 800;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: #000;
-            box-shadow: 0 20px 40px rgba(var(--accent-rgb), 0.2);
-            width: 100%;
-            justify-content: center;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 30px 60px rgba(var(--accent-rgb), 0.4);
-        }
-
-        .btn-submit:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px var(--accent-glow);
-        }
-
-        /* Contributors List */
-        .contributors-section {
-            margin-top: 50px;
-            text-align: center;
-            animation: fadeIn 1s ease-out;
-        }
-
-        .contributor-list {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .contributor-tag {
-            background: var(--glass);
-            border: 1px solid var(--border);
-            padding: 8px 16px;
-            border-radius: 100px;
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--accent);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            animation: tagPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
-        }
-
-        @keyframes tagPop {
-            from {
-                transform: scale(0);
-                opacity: 0;
-            }
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-        }
-
-        /* Countdown Grid */
-        .timer-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            max-width: 700px;
-            margin: 40px auto;
-        }
-
-        .timer-unit {
-            background: var(--glass);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(20px);
-            padding: 30px 10px;
-            border-radius: 30px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .timer-unit::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.03), transparent);
-        }
-
-        .timer-val {
-            display: block;
-            font-size: 48px;
-            font-weight: 900;
-            color: var(--accent);
-            font-family: var(--font-head);
-        }
-
-        .timer-label {
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        /* Vault & Form */
-        .vault-main {
-            background: var(--glass-thick);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(40px);
-            border-radius: 50px;
-            padding: 60px;
-            max-width: 750px;
-            width: 100%;
-            margin: 60px auto;
-            position: relative;
-            text-align: left;
-            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
-        }
-
-        .vault-badge {
-            position: absolute;
-            top: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #fff;
-            color: #000;
-            padding: 10px 24px;
-            border-radius: 100px;
-            font-weight: 900;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .upload-zone {
-            border: 2px dashed var(--border);
-            border-radius: 32px;
-            padding: 40px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.3s;
-            background: rgba(255, 255, 255, 0.01);
-            margin: 24px 0;
-        }
-
-        .upload-zone:hover {
-            border-color: var(--accent);
-            background: rgba(var(--accent-rgb), 0.05);
-        }
-
-        /* Gallery */
-        #gallery-section {
-            display: none;
-            width: 100%;
-            animation: galleryEntrance 1.5s ease;
-        }
-
-        @keyframes galleryEntrance {
-            from {
-                opacity: 0;
-                transform: translateY(60px);
-            }
-        }
-
-        .gallery-masonry {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 32px;
-            margin-top: 50px;
-        }
-
-        .card {
-            background: var(--glass);
-            border: 1px solid var(--border);
-            border-radius: 32px;
-            overflow: hidden;
-            text-align: left;
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-        }
-
-        .card:hover {
-            transform: scale(1.03) translateY(-10px);
-            border-color: var(--accent);
-            z-index: 10;
-            cursor: pointer;
-        }
-
-        .card-img {
-            width: 100%;
-            aspect-ratio: 4/5;
-            object-fit: cover;
-            filter: saturate(1.1);
-        }
-
-        .card-info {
-            padding: 24px;
-            position: relative;
-        }
-
-        .card-name {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--accent);
-            margin-bottom: 6px;
-        }
-
-        .card-note {
-            font-size: 15px;
-            line-height: 1.6;
-            opacity: 0.7;
-            font-weight: 400;
-            font-style: italic;
-        }
-
-        /* Lightbox */
-        #lightbox {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 3000;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(20px);
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            cursor: zoom-out;
-        }
-
-        .light-content {
-            max-width: 1000px;
-            width: 100%;
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            background: #000;
-            border-radius: 40px;
-            overflow: hidden;
-        }
-
-        .light-img {
-            width: 100%;
-            max-height: 80vh;
-            object-fit: contain;
-        }
-
-        .light-side {
-            padding: 40px;
-            background: #0a0a0f;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            text-align: left;
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-40px);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .timer-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
-            }
-
-            .timer-val {
-                font-size: 32px;
-            }
-
-            .light-content {
-                grid-template-columns: 1fr;
-            }
-
-            .vault-main {
-                padding: 30px;
-                border-radius: 30px;
-            }
-
-            h1 {
-                font-size: 52px;
-            }
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>10-H Hatıra Duvarı</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#98a3b3; --accent:#ffb86b; --glass: rgba(255,255,255,0.03);
+      color-scheme: dark;
+    }
+    html,body{height:100%; margin:0; font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+    body{background:linear-gradient(180deg,#071124 0%, #061627 100%); color:#e6eef8; padding:20px;}
+    .wrap{max-width:980px;margin:0 auto;}
+    header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+    h1{font-size:28px;margin:6px 0}
+    .muted{color:var(--muted); font-size:13px}
+    .card{background:var(--card); border-radius:12px; padding:12px; box-shadow:0 6px 18px rgba(2,6,23,0.6);}
+    label{display:block;margin:8px 0 6px;font-size:13px;color:var(--muted)}
+    input[type="text"], input[type="password"], textarea{width:100%; padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04); background:var(--glass); color:var(--muted); outline:none}
+    button{background:linear-gradient(90deg,var(--accent),#ff8a8a); color:#071124; border:none; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600}
+    #main-app{display:none;margin-top:20px}
+    form{display:grid;gap:10px}
+    #fileLabel{display:inline-block;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.02);font-size:13px}
+    .grid{display:grid;grid-template-columns:1fr 300px;gap:18px}
+    .card-img{width:100%;height:180px;object-fit:cover;border-radius:8px}
+    .card-info{padding:8px}
+    .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:12px}
+    .card{cursor:pointer}
+    #lightbox{position:fixed;inset:0;background:rgba(2,6,23,0.9);display:none;align-items:center;justify-content:center;z-index:60}
+    #lightbox .inner{max-width:900px;padding:18px}
+    .contributor-tag{display:inline-block;background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:999px;margin:6px 6px 0 0;font-size:13px}
+    #progWrap{display:none;height:8px;background:rgba(255,255,255,0.03);border-radius:999px;overflow:hidden}
+    #progFill{height:100%;width:0;background:linear-gradient(90deg,#7ef5a4,#60e0ff)}
+    #progText{font-size:12px;color:var(--muted);margin-top:6px}
+    footer{margin-top:30px;color:var(--muted);font-size:13px;text-align:center}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+  </style>
+  <script>
+    window.confetti = window.confetti || function(){};
+  </script>
 </head>
-
 <body>
-    <div class="bg-mesh"></div>
-    <div class="cursor-glow" id="glow"></div>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>10-H <br><small class="muted">Hatıra Duvarı</small></h1>
+      </div>
+      <div style="text-align:right">
+        <div class="muted">Paylaşmak için giriş yap</div>
+        <div id="auth-area">
+          <button onclick="document.getElementById('login-screen').scrollIntoView()">Giriş</button>
+        </div>
+      </div>
+    </header>
 
-    <!-- GİRİŞ EKRANI -->
-    <div id="login-screen">
-        <div class="login-card">
-            <h2 class="hero-label">GİRİŞ PORTALI</h2>
-            <h3 class="login-title"
-                style="font-family: var(--font-head); font-size: 32px; font-weight: 800; margin-bottom: 30px;">Kimliğini
-                Doğrula</h3>
-            <form id="loginForm" class="login-form"
-                style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
-                <input type="text" id="lUser" class="login-input" placeholder="Kullanıcı Adı" required>
-                <input type="password" id="lPass" class="login-input" placeholder="Şifre" required>
-                <button type="submit" class="btn btn-primary">Girişi Tamamla →</button>
-                <p id="lError"
-                    style="color:#f87171; text-align:center; margin-top:10px; font-weight:700; display:none;">Erişim
-                    Reddedildi!</p>
+    <div id="login-screen" class="card" style="margin-top:24px;">
+      <h3>Giriş Yap</h3>
+      <form id="loginForm">
+        <label for="lUser">Kullanıcı adı</label>
+        <input id="lUser" type="text" placeholder="egm1141" required />
+        <label for="lPass">Şifre</label>
+        <input id="lPass" type="password" placeholder="****" required />
+        <div id="lError" style="display:none;color:#ffb4b4;margin-top:6px">Kullanıcı adı veya şifre hatalı</div>
+        <div style="margin-top:10px;display:flex;gap:10px;align-items:center">
+          <button type="submit">Giriş</button>
+          <button type="button" onclick="logout()" style="background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04);">Çıkış</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="main-app">
+      <div class="grid">
+        <div>
+          <div class="card">
+            <h3>Anı Ekle</h3>
+            <form id="memoryForm" class="card" style="margin-top:8px">
+              <label for="mName">Adın</label>
+              <input id="mName" type="text" placeholder="Egemen" required />
+              <label for="mNote">Not (isteğe bağlı)</label>
+              <textarea id="mNote" rows="3" placeholder="Kısa bir not..."></textarea>
+              <label for="mFile">Fotoğraf</label>
+              <label id="fileLabel" for="mFile">🖼️ Fotoğraf Seç veya Sürükle</label>
+              <input id="mFile" type="file" accept="image/*" style="display:none" />
+              <div id="progWrap" style="margin-top:8px"><div id="progFill"></div></div>
+              <div id="progText"></div>
+              <div style="display:flex;gap:8px;margin-top:10px">
+                <button type="submit">Anıyı Kilitle</button>
+                <button type="button" onclick="document.getElementById('memoryForm').reset()" style="background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04);">Temizle</button>
+              </div>
             </form>
+            <div style="margin-top:12px" class="muted">Yüklenen fotoğraflar sadece belirlenen süre için erişilebilir (signed URL) veya bucket public ise doğrudan erişilir.</div>
+          </div>
+
+          <div id="countdown-section" class="card" style="margin-top:12px">
+            <h3>Geri Sayım</h3>
+            <div style="font-size:24px;display:flex;gap:12px">
+              <div><div id="days">00</div><div class="muted">Gün</div></div>
+              <div><div id="hours">00</div><div class="muted">Saat</div></div>
+              <div><div id="minutes">00</div><div class="muted">Dakika</div></div>
+              <div><div id="seconds">00</div><div class="muted">Saniye</div></div>
+            </div>
+          </div>
+
         </div>
+
+        <aside>
+          <div class="card">
+            <h4>Katılımcılar <span id="contributor-count">0</span></h4>
+            <div id="contributor-section" style="display:none;margin-top:8px">
+              <div id="contributor-list"></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <h4>Bilgi</h4>
+            <p class="muted" style="font-size:13px">Bu sayfa Supabase Storage + Postgres ile çalışır. Fotoğraf yüklerken bucket adı: <strong>10h</strong></p>
+          </div>
+        </aside>
+      </div>
+
+      <section id="gallery-section" style="display:none;margin-top:18px">
+        <h3>Galeri</h3>
+        <div id="gallery" class="gallery"></div>
+      </section>
     </div>
 
-    <!-- ANA PLATFORM -->
-    <div class="app" id="main-app" style="display: none;">
-        <header>
-            <span class="hero-label">2025 - 2026 EĞİTİM YILI</span>
-            <h1>10-H Sınıfı<br>Hatıra Kasası</h1>
-            <p style="color:var(--muted); font-size: 20px; font-weight: 500;">Büyük Açılış İçin Geri Sayım</p>
-            <div style="margin-top: 20px;">
-                <button onclick="logout()"
-                    style="color:var(--accent); background:rgba(255,255,255,0.05); border:1px solid var(--border); padding:8px 16px; border-radius:12px; font-size:11px; font-weight:800; letter-spacing:1px; cursor:pointer; pointer-events:all;">OTURUMU
-                    KAPAT (ÇIKIŞ)</button>
-            </div>
-        </header>
+    <footer>
+      <div class="muted">Hazır • 10-H Hatıra Duvarı</div>
+    </footer>
+  </div>
 
-        <!-- KİLİTLİ PANEL -->
-        <div id="countdown-section">
-            <div class="timer-grid">
-                <div class="timer-unit"><span class="timer-val" id="days">00</span><span class="timer-label">GÜN</span>
-                </div>
-                <div class="timer-unit"><span class="timer-val" id="hours">00</span><span
-                        class="timer-label">SAAT</span></div>
-                <div class="timer-unit"><span class="timer-val" id="minutes">00</span><span
-                        class="timer-label">DK</span></div>
-                <div class="timer-unit"><span class="timer-val" id="seconds">00</span><span
-                        class="timer-label">SN</span></div>
-            </div>
-
-            <div class="vault-main">
-                <div class="vault-badge">Kasa Kilitli</div>
-                <h2 style="font-family: var(--font-head); font-size: 32px; margin-bottom: 12px; color: var(--accent);">
-                    Kasaya Anı Bırak</h2>
-                <p style="color: var(--muted); line-height: 1.6;">Lise hayatından unutulmaz bir fotoğrafı ve notu buraya
-                    kilitle. 26 Haziran 2026'da tüm sınıfın anılarıyla birlikte ortaya çıkacak.</p>
-
-                <form id="memoryForm" style="margin-top: 32px;">
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom:16px;">
-                        <input type="text" id="mName" class="login-input" style="margin-bottom:0;" readonly>
-                        <div
-                            style="display:flex; align-items:center; padding:0 20px; background:rgba(255,255,255,0.05); border-radius:18px; color:var(--muted); font-size:13px; font-weight:700;">
-                            10-H ÜYESİ</div>
-                    </div>
-                    <textarea id="mNote" class="login-input" rows="3"
-                        placeholder="Sınıf arkadaşlarına bir not bırak..."></textarea>
-
-                    <input type="file" id="mFile" accept="image/*" style="display:none" required>
-                    <div class="upload-zone" onclick="document.getElementById('mFile').click()" id="fileLabel">
-                        <span style="font-size:32px; display:block; margin-bottom:10px;">🖼️</span>
-                        <span style="font-weight:700;">Fotoğraf Seç veya Sürükle</span>
-                        <p style="font-size:12px; color:var(--muted); margin-top:4px;">JPG, PNG veya WEBP</p>
-                    </div>
-
-                    <div id="progWrap" style="display:none; margin-bottom:20px;">
-                        <div
-                            style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px; font-weight:900;">
-                            <span style="color:var(--accent)">BULUTA AKTARILIYOR...</span>
-                            <span id="progText">0%</span>
-                        </div>
-                        <div
-                            style="width:100%; height:8px; background:rgba(255,255,255,0.1); border-radius:10px; overflow:hidden;">
-                            <div id="progFill"
-                                style="height:100%; background:var(--accent); width:0%; transition:width 0.3s;"></div>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">ANINI KASAYA KİLİTLE 🔒</button>
-                </form>
-
-                <!-- KATILIMCILAR LİSTESİ -->
-                <div class="contributors-section" id="contributor-section">
-                    <p style="color:var(--muted); font-size:12px; font-weight:800; letter-spacing:2px;">ANISINI
-                        KİLİTLEYENLER (<span id="contributor-count">0</span>)</p>
-                    <div class="contributor-list" id="contributor-list">
-                        <!-- İsimler buraya gelecek -->
-                    </div>
-                </div>
-            </div>
+  <div id="lightbox" onclick="closeLightbox()">
+    <div class="inner card" onclick="event.stopPropagation()">
+      <img id="lightImg" src="" style="max-width:100%;border-radius:8px;display:block;margin-bottom:12px" />
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div id="lightName" style="font-weight:700"></div>
+          <div id="lightNote" class="muted" style="font-size:14px;margin-top:6px"></div>
         </div>
-
-        <!-- GALERİ (GİZLİ) -->
-        <div id="gallery-section">
-            <div id="gallery" class="gallery-masonry"></div>
-        </div>
+        <div><button onclick="closeLightbox()">Kapat</button></div>
+      </div>
     </div>
+  </div>
 
-    <!-- LIGHTBOX -->
-    <div id="lightbox" onclick="closeLightbox()">
-        <div class="light-content" onclick="event.stopPropagation()">
-            <img id="lightImg" src="" class="light-img">
-            <div class="light-side">
-                <h4 id="lightName" style="color:var(--accent); font-size:32px; font-weight:900; margin-bottom:16px;">
-                </h4>
-                <p id="lightNote" style="font-size:18px; line-height:1.7; opacity:0.8; font-style:italic;"></p>
-                <div style="margin-top:auto; padding-top:40px; border-top:1px solid var(--border);">
-                    <p
-                        style="font-size:12px; color:var(--muted); font-weight:800; letter-spacing:2px; text-transform:uppercase;">
-                        10-H Bellek Kaydı</p>
-                </div>
-            </div>
+  <script type="module">
+    // -------------------------
+    //  Supabase client config
+    // -------------------------
+    // DEĞİŞTİR: kendi Supabase projenin URL ve anon key'ini koy
+    const SUPABASE_URL = 'https://<project-ref>.supabase.co'; // <-- burayı değiştir
+    const SUPABASE_ANON_KEY = '<anon-public-key>'; // <-- burayı değiştir
+
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.28.0/dist/supabase.min.js';
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: false }
+    });
+
+    // -------------------------
+    //  LOCAL AUTH (MEVCUT)
+    // -------------------------
+    const VALID_USERS = {
+      "egm1141": "1141",
+      "omer": "1311",
+      "10h": "2026"
+    };
+
+    window.login = async (user, pass) => {
+      const u = user.toLowerCase().trim();
+      if (VALID_USERS[u] === pass) {
+        localStorage.setItem('10h_vault_session', u);
+        showApp(u);
+      } else {
+        document.getElementById('lError').style.display = 'block';
+      }
+    };
+
+    window.logout = () => {
+      localStorage.removeItem('10h_vault_session');
+      window.location.reload();
+    };
+
+    function showApp(name) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('main-app').style.display = 'block';
+      document.getElementById('mName').value = name.toUpperCase();
+    }
+
+    const saved = localStorage.getItem('10h_vault_session');
+    if (saved) showApp(saved);
+
+    document.getElementById('loginForm').addEventListener('submit', e => {
+      e.preventDefault();
+      window.login(document.getElementById('lUser').value, document.getElementById('lPass').value);
+    });
+
+    // -------------------------
+    //  UPLOAD LOGIC (Supabase Storage)
+    // -------------------------
+    document.getElementById('mFile').addEventListener('change', e => {
+      const fileName = e.target.files[0]?.name;
+      document.getElementById('fileLabel').innerHTML = fileName ? `✅ ${fileName}` : `🖼️ Fotoğraf Seç veya Sürükle`;
+    });
+
+    document.getElementById('memoryForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const file = document.getElementById('mFile').files[0];
+      const name = document.getElementById('mName').value;
+      const note = document.getElementById('mNote').value;
+      if (!file) return;
+
+      const wrap = document.getElementById('progWrap'), fill = document.getElementById('progFill'), txt = document.getElementById('progText');
+      wrap.style.display = 'block';
+
+      try {
+        const user = localStorage.getItem('10h_vault_session') || 'anonymous';
+        const timestamp = Date.now();
+        const folder = `${user}`;
+        const filePath = `10h/${folder}/${timestamp}_${file.name}`;
+
+        const { data: uploadData, error: uploadErr } = await supabase.storage
+          .from('10h')
+          .upload(filePath, file, { cacheControl: '3600', upsert: false });
+
+        if (uploadErr) throw uploadErr;
+
+        let url = '';
+        const { data: signed, error: signedErr } = await supabase.storage
+          .from('10h')
+          .createSignedUrl(filePath, 60 * 60 * 24 * 7);
+
+        if (!signedErr && signed?.signedUrl) {
+          url = signed.signedUrl;
+        } else {
+          const { data: pub } = supabase.storage.from('10h').getPublicUrl(filePath);
+          url = pub.publicUrl;
+        }
+
+        fill.style.width = '100%'; txt.innerText = '100%';
+
+        const { error: insertErr } = await supabase.from('10h_memories').insert([{
+          name, note, photo: url, date: new Date().toISOString()
+        }]);
+
+        if (insertErr) throw insertErr;
+
+        try{ confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }); }catch(e){}
+
+        alert('ANIN KASAYA EKLENDİ! 🔒');
+        document.getElementById('memoryForm').reset();
+        document.getElementById('fileLabel').innerHTML = '🖼️ Fotoğraf Seç veya Sürükle';
+        wrap.style.display = 'none';
+        loadContributors();
+        if (isReveal) initGallery();
+      } catch (err) {
+        alert('Yükleme sırasında hata oluştu: ' + (err.message || JSON.stringify(err)));
+        wrap.style.display = 'none';
+        console.error(err);
+      }
+    });
+
+    // -------------------------
+    //  REVEAL & CONTENT
+    // -------------------------
+    const targetDate = new Date('March 25, 2026 20:05:00').getTime();
+    let isReveal = false;
+
+    function updateTimer() {
+      const now = new Date().getTime(), rem = targetDate - now;
+      const isTest = new URLSearchParams(window.location.search).get('test') === 'true';
+
+      if (rem <= 0 || isTest) {
+        if (!isReveal) {
+          isReveal = true;
+          document.getElementById('countdown-section').style.display = 'none';
+          document.getElementById('gallery-section').style.display = 'block';
+          document.querySelector('h1').innerHTML = "10-H<br>Hatıra Duvarı";
+          try{ confetti({ particleCount: 300, spread: 160, origin: { y: 0.5 } }); }catch(e){}
+          initGallery();
+        }
+        return;
+      }
+
+      const d = Math.floor(rem / (1000 * 60 * 60 * 24));
+      const h = Math.floor((rem % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const m = Math.floor((rem % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((rem % (1000 * 60)) / 1000);
+
+      document.getElementById('days').innerText = String(d).padStart(2, '0');
+      document.getElementById('hours').innerText = String(h).padStart(2, '0');
+      document.getElementById('minutes').innerText = String(m).padStart(2, '0');
+      document.getElementById('seconds').innerText = String(s).padStart(2, '0');
+    }
+
+    async function initGallery() {
+      try {
+        const { data, error } = await supabase
+          .from('10h_memories')
+          .select('*')
+          .order('date', { ascending: false });
+
+        if (error) throw error;
+        renderGallery(data || []);
+
+        try {
+          supabase.channel('public:10h_memories')
+            .on('postgres_changes', { event: '*', schema: 'public', table: '10h_memories' }, payload => {
+              (async () => {
+                const { data: newData } = await supabase.from('10h_memories').select('*').order('date', { ascending: false });
+                renderGallery(newData || []);
+                loadContributors();
+              })();
+            })
+            .subscribe();
+        } catch (e) {
+          console.warn('Realtime subscribe failed', e);
+        }
+
+      } catch (err) {
+        console.error('Gallery init error', err);
+      }
+    }
+
+    function renderGallery(list) {
+      document.getElementById('gallery').innerHTML = (list || []).map(m => `
+        <div class="card" onclick="openLightbox('${m.photo}', '${m.name}', '${(m.note||'').replace(/'/g, \"\\\\'\")}')">
+          <img src="${m.photo}" class="card-img" loading="lazy">
+          <div class="card-info">
+            <div class="card-name">${m.name}</div>
+            <div class="card-note">"${m.note || 'Sessiz bir anı...'}"</div>
+          </div>
         </div>
-    </div>
+      `).join('');
+    }
 
-    <script>
-        // Non-Firebase UI Logic
-        const glow = document.getElementById('glow');
-        window.addEventListener('mousemove', e => {
-            glow.style.left = e.clientX + 'px';
-            glow.style.top = e.clientY + 'px';
-        });
-    </script>
+    async function loadContributors() {
+      try {
+        const { data, error } = await supabase.from('10h_memories').select('name');
+        if (error) throw error;
+        const names = [...new Set((data || []).map(d => d.name))];
+        renderContributors(names);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderContributors(names) {
+      const container = document.getElementById('contributor-list');
+      const countEl = document.getElementById('contributor-count');
+      const section = document.getElementById('contributor-section');
+
+      section.style.display = 'block';
+      countEl.innerText = names.length;
+
+      if (!names.length) {
+        container.innerHTML = `<p style="font-size:13px; color:var(--muted); font-style:italic; margin-top:10px;">Henüz anı kilitlenmemiş. İlk sen ol! ✨</p>`;
+        return;
+      }
+
+      container.innerHTML = names.map((n, i) => `<div class="contributor-tag" style="animation-delay: ${i * 0.1}s">✅ ${n}</div>`).join('');
+    }
+
+    setInterval(updateTimer, 1000);
+    updateTimer();
+    loadContributors();
+
+    window.openLightbox = (img, name, note) => {
+      document.getElementById('lightImg').src = img;
+      document.getElementById('lightName').innerText = name;
+      document.getElementById('lightNote').innerText = note || "Lise hayatına dair ufak bir hatıra.";
+      document.getElementById('lightbox').style.display = 'flex';
+    };
+    window.closeLightbox = () => { document.getElementById('lightbox').style.display = 'none'; };
+
+  </script>
 </body>
-
 </html>
