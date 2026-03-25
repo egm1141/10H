@@ -3,433 +3,786 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>10-H Hatıra Duvarı</title>
+  <title>10-H · Hatıra Duvarı</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg:#0f1724; --card:#0b1220; --muted:#98a3b3; --accent:#ffb86b; --glass: rgba(255,255,255,0.03);
-      color-scheme: dark;
+    :root {
+      --bg:       #0e0e10;
+      --surface:  #161618;
+      --surface2: #1e1e21;
+      --border:   rgba(255,255,255,0.07);
+      --yellow:   #f5c518;
+      --yellow2:  #ffd83d;
+      --muted:    #888896;
+      --text:     #f0f0f5;
+      --glow:     rgba(245,197,24,0.18);
     }
-    html,body{height:100%; margin:0; font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
-    body{background:linear-gradient(180deg,#071124 0%, #061627 100%); color:#e6eef8; padding:20px;}
-    .wrap{max-width:980px;margin:0 auto;}
-    header{display:flex;align-items:center;justify-content:space-between;gap:16px}
-    h1{font-size:28px;margin:6px 0}
-    .muted{color:var(--muted); font-size:13px}
-    .card{background:var(--card); border-radius:12px; padding:12px; box-shadow:0 6px 18px rgba(2,6,23,0.6);}
-    label{display:block;margin:8px 0 6px;font-size:13px;color:var(--muted)}
-    input[type="text"], input[type="password"], textarea{width:100%; padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04); background:var(--glass); color:var(--muted); outline:none}
-    button{background:linear-gradient(90deg,var(--accent),#ff8a8a); color:#071124; border:none; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600}
-    #main-app{display:none;margin-top:20px}
-    form{display:grid;gap:10px}
-    #fileLabel{display:inline-block;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.02);font-size:13px}
-    .grid{display:grid;grid-template-columns:1fr 300px;gap:18px}
-    .card-img{width:100%;height:180px;object-fit:cover;border-radius:8px}
-    .card-info{padding:8px}
-    .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:12px}
-    .card{cursor:pointer}
-    #lightbox{position:fixed;inset:0;background:rgba(2,6,23,0.9);display:none;align-items:center;justify-content:center;z-index:60}
-    #lightbox .inner{max-width:900px;padding:18px}
-    .contributor-tag{display:inline-block;background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:999px;margin:6px 6px 0 0;font-size:13px}
-    #progWrap{display:none;height:8px;background:rgba(255,255,255,0.03);border-radius:999px;overflow:hidden}
-    #progFill{height:100%;width:0;background:linear-gradient(90deg,#7ef5a4,#60e0ff)}
-    #progText{font-size:12px;color:var(--muted);margin-top:6px}
-    footer{margin-top:30px;color:var(--muted);font-size:13px;text-align:center}
-    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100%;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* radial glow at top */
+    body::before {
+      content: '';
+      position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 500px;
+      background: radial-gradient(ellipse, rgba(245,197,24,0.08) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .wrap { position: relative; z-index: 1; max-width: 1040px; margin: 0 auto; padding: 0 24px 60px; }
+
+    /* ---- HEADER ---- */
+    header {
+      padding: 48px 0 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-end; justify-content: space-between; gap: 20px;
+    }
+
+    .logo-year {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px; letter-spacing: 0.22em; color: var(--yellow);
+      text-transform: uppercase; margin-bottom: 8px;
+    }
+
+    h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(56px, 9vw, 96px);
+      line-height: 0.92;
+      letter-spacing: 0.02em;
+      color: var(--text);
+    }
+
+    h1 span { color: var(--yellow); }
+
+    .header-right { text-align: right; }
+
+    .header-tagline {
+      font-size: 13px; color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.04em; line-height: 1.7;
+    }
+
+    /* ---- BUTTONS ---- */
+    .btn {
+      display: inline-block;
+      padding: 11px 22px;
+      border-radius: 100px;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 500;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      letter-spacing: 0.01em;
+    }
+    .btn-fill {
+      background: var(--yellow);
+      color: #0e0e10;
+    }
+    .btn-fill:hover { background: var(--yellow2); transform: translateY(-1px); box-shadow: 0 6px 24px var(--glow); }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .btn-outline:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+    .btn-header {
+      margin-top: 14px;
+      padding: 9px 20px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .btn-header:hover { border-color: var(--yellow); color: var(--yellow); }
+
+    /* ---- LOGIN CARD ---- */
+    .login-card {
+      max-width: 420px; margin: 52px auto 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 38px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    .login-card h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 52px; line-height: 1; letter-spacing: 0.02em;
+      margin-bottom: 4px;
+    }
+
+    .login-card .subtitle {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px; color: var(--muted); letter-spacing: 0.12em;
+      margin-bottom: 30px;
+    }
+
+    fieldset { border: none; display: grid; gap: 16px; }
+
+    .field label {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 8px;
+    }
+
+    .field input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 13px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px; color: var(--text);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .field input:focus {
+      border-color: var(--yellow);
+      box-shadow: 0 0 0 3px rgba(245,197,24,0.12);
+    }
+
+    .form-actions { display: flex; gap: 10px; margin-top: 24px; align-items: center; }
+
+    .error-msg {
+      font-size: 13px; color: #ff6b6b;
+      margin-top: 12px; display: none;
+      font-weight: 500;
+    }
+
+    /* ---- MAIN APP ---- */
+    #main-app { display: none; }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: 1fr 272px;
+      gap: 20px;
+      margin-top: 36px;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) { .app-grid { grid-template-columns: 1fr; } }
+
+    /* ---- LABELS ---- */
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--yellow);
+      margin-bottom: 10px;
+    }
+
+    h2.section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 38px; letter-spacing: 0.02em; line-height: 1;
+      margin-bottom: 22px;
+    }
+
+    /* ---- MEMORY FORM ---- */
+    .memory-form-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+    }
+
+    textarea {
+      width: 100%; resize: none;
+      background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px; color: var(--text);
+      line-height: 1.6; outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    textarea:focus {
+      border-color: var(--yellow);
+      box-shadow: 0 0 0 3px rgba(245,197,24,0.10);
+    }
+
+    .file-pick {
+      display: flex; align-items: center; gap: 12px; cursor: pointer;
+      border: 1.5px dashed rgba(255,255,255,0.12); border-radius: 12px;
+      padding: 14px 16px;
+      background: var(--surface2);
+      font-family: 'DM Mono', monospace;
+      font-size: 12px; color: var(--muted);
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .file-pick:hover { border-color: var(--yellow); background: rgba(245,197,24,0.04); color: var(--text); }
+    .file-pick-icon { font-size: 20px; }
+
+    /* ---- PROGRESS ---- */
+    .prog-wrap {
+      display: none; height: 3px;
+      background: var(--surface2); border-radius: 999px; overflow: hidden; margin-top: 14px;
+    }
+    .prog-fill {
+      height: 100%; width: 0;
+      background: linear-gradient(90deg, var(--yellow), var(--yellow2));
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+    .prog-text {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px; color: var(--muted); margin-top: 6px;
+    }
+
+    /* ---- COUNTDOWN ---- */
+    .countdown-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      margin-top: 16px;
+      position: relative; overflow: hidden;
+    }
+
+    .countdown-card::before {
+      content: '';
+      position: absolute; bottom: -40px; right: -40px;
+      width: 160px; height: 160px;
+      background: radial-gradient(circle, var(--glow) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cd-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 8px; margin-top: 10px;
+    }
+
+    .cd-unit {
+      text-align: center;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 8px 12px;
+    }
+
+    .cd-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 40px; line-height: 1; color: var(--yellow);
+      font-variant-numeric: tabular-nums; letter-spacing: 0.02em;
+    }
+
+    .cd-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted); margin-top: 6px;
+    }
+
+    /* ---- SIDEBAR ---- */
+    .sidebar-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+    }
+
+    .sidebar-card + .sidebar-card { margin-top: 14px; }
+
+    .contributor-tag {
+      display: inline-block;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 5px 12px;
+      margin: 4px 4px 0 0;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px; color: var(--muted);
+    }
+
+    .sidebar-info {
+      font-size: 14px; color: var(--muted); line-height: 1.7;
+    }
+
+    /* ---- GALLERY ---- */
+    #gallery-section { margin-top: 48px; }
+
+    .divider {
+      border: none; border-top: 1px solid var(--border);
+      margin-bottom: 32px;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+    }
+
+    .memory-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s;
+    }
+    .memory-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+      border-color: rgba(245,197,24,0.3);
+    }
+
+    .memory-card img {
+      width: 100%; height: 190px; object-fit: cover; display: block;
+    }
+
+    .memory-card-body { padding: 14px 16px 16px; }
+
+    .memory-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px; letter-spacing: 0.02em; color: var(--text);
+    }
+
+    .memory-note {
+      font-size: 13px; color: var(--muted);
+      font-style: italic; margin-top: 4px; line-height: 1.5;
+    }
+
+    /* ---- LIGHTBOX ---- */
+    #lightbox {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: none; align-items: center; justify-content: center;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+    }
+
+    .lightbox-inner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      max-width: 780px; width: calc(100% - 40px);
+      max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.7);
+    }
+
+    .lightbox-inner img {
+      width: 100%; display: block; border-radius: 20px 20px 0 0;
+      max-height: 58vh; object-fit: cover;
+    }
+
+    .lightbox-body {
+      padding: 22px 26px;
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+    }
+
+    #lightName {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 30px; letter-spacing: 0.02em;
+    }
+    #lightNote { font-size: 15px; color: var(--muted); font-style: italic; margin-top: 6px; line-height: 1.6; }
+
+    /* ---- FOOTER ---- */
+    footer {
+      margin-top: 60px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+
+    .footer-text {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px; color: var(--muted); letter-spacing: 0.08em;
+    }
+
+    .footer-dot { width: 6px; height: 6px; background: var(--yellow); border-radius: 50%; }
+
+    /* ---- ANIMATE ---- */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.5s cubic-bezier(.22,.68,0,1.2) both; }
+    .delay-1 { animation-delay: 0.08s; }
+    .delay-2 { animation-delay: 0.16s; }
+    .delay-3 { animation-delay: 0.24s; }
   </style>
-  <script>
-    window.confetti = window.confetti || function(){};
-  </script>
 </head>
 <body>
-  <div class="wrap">
-    <header>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header class="fade-up">
+    <div class="logo-block">
+      <div class="logo-year">Lise — 2026</div>
+      <h1>10-H<br><span>Hatıra Duvarı</span></h1>
+    </div>
+    <div class="header-right">
+      <div class="header-tagline">
+        Anlarını kilitle,<br>birlikte aç.
+      </div>
+      <div id="auth-area">
+        <button class="btn btn-header" onclick="document.getElementById('login-screen').scrollIntoView({behavior:'smooth'})">Giriş Yap →</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- LOGIN -->
+  <div id="login-screen" class="login-card fade-up delay-1">
+    <h2>Kasaya Giriş</h2>
+    <div class="subtitle">Sadece sınıf için</div>
+    <form id="loginForm">
+      <fieldset>
+        <div class="field">
+          <label for="lUser">Kullanıcı Adı</label>
+          <input id="lUser" type="text" placeholder="egm1141" required autocomplete="username" />
+        </div>
+        <div class="field">
+          <label for="lPass">Şifre</label>
+          <input id="lPass" type="password" placeholder="••••" required autocomplete="current-password" />
+        </div>
+      </fieldset>
+      <div id="lError" class="error-msg">Kullanıcı adı veya şifre hatalı.</div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-fill">Giriş</button>
+        <button type="button" class="btn btn-outline" onclick="logout()">Çıkış</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="main-app">
+    <div class="app-grid">
+
+      <!-- LEFT -->
       <div>
-        <h1>10-H <br><small class="muted">Hatıra Duvarı</small></h1>
-      </div>
-      <div style="text-align:right">
-        <div class="muted">Paylaşmak için giriş yap</div>
-        <div id="auth-area">
-          <button onclick="document.getElementById('login-screen').scrollIntoView()">Giriş</button>
-        </div>
-      </div>
-    </header>
-
-    <div id="login-screen" class="card" style="margin-top:24px;">
-      <h3>Giriş Yap</h3>
-      <form id="loginForm">
-        <label for="lUser">Kullanıcı adı</label>
-        <input id="lUser" type="text" placeholder="egm1141" required />
-        <label for="lPass">Şifre</label>
-        <input id="lPass" type="password" placeholder="****" required />
-        <div id="lError" style="display:none;color:#ffb4b4;margin-top:6px">Kullanıcı adı veya şifre hatalı</div>
-        <div style="margin-top:10px;display:flex;gap:10px;align-items:center">
-          <button type="submit">Giriş</button>
-          <button type="button" onclick="logout()" style="background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04);">Çıkış</button>
-        </div>
-      </form>
-    </div>
-
-    <div id="main-app">
-      <div class="grid">
-        <div>
-          <div class="card">
-            <h3>Anı Ekle</h3>
-            <form id="memoryForm" class="card" style="margin-top:8px">
-              <label for="mName">Adın</label>
-              <input id="mName" type="text" placeholder="Egemen" required />
-              <label for="mNote">Not (isteğe bağlı)</label>
-              <textarea id="mNote" rows="3" placeholder="Kısa bir not..."></textarea>
-              <label for="mFile">Fotoğraf</label>
-              <label id="fileLabel" for="mFile">🖼️ Fotoğraf Seç veya Sürükle</label>
-              <input id="mFile" type="file" accept="image/*" style="display:none" />
-              <div id="progWrap" style="margin-top:8px"><div id="progFill"></div></div>
-              <div id="progText"></div>
-              <div style="display:flex;gap:8px;margin-top:10px">
-                <button type="submit">Anıyı Kilitle</button>
-                <button type="button" onclick="document.getElementById('memoryForm').reset()" style="background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04);">Temizle</button>
+        <div class="memory-form-wrap fade-up">
+          <div class="section-label">Yeni Anı</div>
+          <h2 class="section-title">Anını Kilitle</h2>
+          <form id="memoryForm">
+            <fieldset style="gap:16px;display:grid">
+              <div class="field">
+                <label for="mName">Adın</label>
+                <input id="mName" type="text" placeholder="Egemen" required />
               </div>
-            </form>
-            <div style="margin-top:12px" class="muted">Yüklenen fotoğraflar sadece belirlenen süre için erişilebilir (signed URL) veya bucket public ise doğrudan erişilir.</div>
-          </div>
-
-          <div id="countdown-section" class="card" style="margin-top:12px">
-            <h3>Geri Sayım</h3>
-            <div style="font-size:24px;display:flex;gap:12px">
-              <div><div id="days">00</div><div class="muted">Gün</div></div>
-              <div><div id="hours">00</div><div class="muted">Saat</div></div>
-              <div><div id="minutes">00</div><div class="muted">Dakika</div></div>
-              <div><div id="seconds">00</div><div class="muted">Saniye</div></div>
+              <div class="field">
+                <label for="mNote">Not <span style="font-size:9px;opacity:0.5">(isteğe bağlı)</span></label>
+                <textarea id="mNote" rows="3" placeholder="Bırakmak istediğin küçük bir not…"></textarea>
+              </div>
+              <div class="field">
+                <label for="mFile">Fotoğraf</label>
+                <label class="file-pick" for="mFile" id="fileLabel">
+                  <span class="file-pick-icon">📷</span>
+                  <span id="fileLabelText">Fotoğraf seç veya sürükle</span>
+                </label>
+                <input id="mFile" type="file" accept="image/*" style="display:none" />
+              </div>
+            </fieldset>
+            <div class="prog-wrap" id="progWrap"><div class="prog-fill" id="progFill"></div></div>
+            <div class="prog-text" id="progText"></div>
+            <div class="form-actions" style="margin-top:20px">
+              <button type="submit" class="btn btn-fill">Anıyı Kilitle 🔒</button>
+              <button type="button" class="btn btn-outline" onclick="document.getElementById('memoryForm').reset();document.getElementById('fileLabelText').innerText='Fotoğraf seç veya sürükle'">Temizle</button>
             </div>
-          </div>
-
+          </form>
         </div>
 
-        <aside>
-          <div class="card">
-            <h4>Katılımcılar <span id="contributor-count">0</span></h4>
-            <div id="contributor-section" style="display:none;margin-top:8px">
-              <div id="contributor-list"></div>
-            </div>
+        <!-- COUNTDOWN -->
+        <div id="countdown-section" class="countdown-card fade-up delay-2">
+          <div class="section-label">Açılışa Kalan</div>
+          <div class="cd-grid">
+            <div class="cd-unit"><div class="cd-num" id="days">00</div><div class="cd-label">Gün</div></div>
+            <div class="cd-unit"><div class="cd-num" id="hours">00</div><div class="cd-label">Saat</div></div>
+            <div class="cd-unit"><div class="cd-num" id="minutes">00</div><div class="cd-label">Dakika</div></div>
+            <div class="cd-unit"><div class="cd-num" id="seconds">00</div><div class="cd-label">Saniye</div></div>
           </div>
-
-          <div class="card" style="margin-top:12px">
-            <h4>Bilgi</h4>
-            <p class="muted" style="font-size:13px">Bu sayfa Supabase Storage + Postgres ile çalışır. Fotoğraf yüklerken bucket adı: <strong>10h</strong></p>
-          </div>
-        </aside>
+        </div>
       </div>
 
-      <section id="gallery-section" style="display:none;margin-top:18px">
-        <h3>Galeri</h3>
-        <div id="gallery" class="gallery"></div>
-      </section>
-    </div>
-
-    <footer>
-      <div class="muted">Hazır • 10-H Hatıra Duvarı</div>
-    </footer>
-  </div>
-
-  <div id="lightbox" onclick="closeLightbox()">
-    <div class="inner card" onclick="event.stopPropagation()">
-      <img id="lightImg" src="" style="max-width:100%;border-radius:8px;display:block;margin-bottom:12px" />
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div id="lightName" style="font-weight:700"></div>
-          <div id="lightNote" class="muted" style="font-size:14px;margin-top:6px"></div>
-        </div>
-        <div><button onclick="closeLightbox()">Kapat</button></div>
-      </div>
-    </div>
-  </div>
-
-  <script type="module">
-    // -------------------------
-    //  Supabase client config
-    // -------------------------
-    // DEĞİŞTİR: kendi Supabase projenin URL ve anon key'ini koy
-    const SUPABASE_URL = 'https://<project-ref>.supabase.co'; // <-- burayı değiştir
-    const SUPABASE_ANON_KEY = '<anon-public-key>'; // <-- burayı değiştir
-
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.28.0/dist/supabase.min.js';
-
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: false }
-    });
-
-    // -------------------------
-    //  LOCAL AUTH (MEVCUT)
-    // -------------------------
-    const VALID_USERS = {
-      "egm1141": "1141",
-      "omer": "1311",
-      "10h": "2026"
-    };
-
-    window.login = async (user, pass) => {
-      const u = user.toLowerCase().trim();
-      if (VALID_USERS[u] === pass) {
-        localStorage.setItem('10h_vault_session', u);
-        showApp(u);
-      } else {
-        document.getElementById('lError').style.display = 'block';
-      }
-    };
-
-    window.logout = () => {
-      localStorage.removeItem('10h_vault_session');
-      window.location.reload();
-    };
-
-    function showApp(name) {
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('main-app').style.display = 'block';
-      document.getElementById('mName').value = name.toUpperCase();
-    }
-
-    const saved = localStorage.getItem('10h_vault_session');
-    if (saved) showApp(saved);
-
-    document.getElementById('loginForm').addEventListener('submit', e => {
-      e.preventDefault();
-      window.login(document.getElementById('lUser').value, document.getElementById('lPass').value);
-    });
-
-    // -------------------------
-    //  UPLOAD LOGIC (Supabase Storage)
-    // -------------------------
-    document.getElementById('mFile').addEventListener('change', e => {
-      const fileName = e.target.files[0]?.name;
-      document.getElementById('fileLabel').innerHTML = fileName ? `✅ ${fileName}` : `🖼️ Fotoğraf Seç veya Sürükle`;
-    });
-
-    document.getElementById('memoryForm').addEventListener('submit', async e => {
-      e.preventDefault();
-      const file = document.getElementById('mFile').files[0];
-      const name = document.getElementById('mName').value;
-      const note = document.getElementById('mNote').value;
-      if (!file) return;
-
-      const wrap = document.getElementById('progWrap'), fill = document.getElementById('progFill'), txt = document.getElementById('progText');
-      wrap.style.display = 'block';
-
-      try {
-        const user = localStorage.getItem('10h_vault_session') || 'anonymous';
-        const timestamp = Date.now();
-        const folder = `${user}`;
-        const filePath = `10h/${folder}/${timestamp}_${file.name}`;
-
-        const { data: uploadData, error: uploadErr } = await supabase.storage
-          .from('10h')
-          .upload(filePath, file, { cacheControl: '3600', upsert: false });
-
-        if (uploadErr) throw uploadErr;
-
-        let url = '';
-        const { data: signed, error: signedErr } = await supabase.storage
-          .from('10h')
-          .createSignedUrl(filePath, 60 * 60 * 24 * 7);
-
-        if (!signedErr && signed?.signedUrl) {
-          url = signed.signedUrl;
-        } else {
-          const { data: pub } = supabase.storage.from('10h').getPublicUrl(filePath);
-          url = pub.publicUrl;
-        }
-
-        fill.style.width = '100%'; txt.innerText = '100%';
-
-        const { error: insertErr } = await supabase.from('10h_memories').insert([{
-          name, note, photo: url, date: new Date().toISOString()
-        }]);
-
-        if (insertErr) throw insertErr;
-
-        try{ confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }); }catch(e){}
-
-        alert('ANIN KASAYA EKLENDİ! 🔒');
-        document.getElementById('memoryForm').reset();
-        document.getElementById('fileLabel').innerHTML = '🖼️ Fotoğraf Seç veya Sürükle';
-        wrap.style.display = 'none';
-        loadContributors();
-        if (isReveal) initGallery();
-      } catch (err) {
-        alert('Yükleme sırasında hata oluştu: ' + (err.message || JSON.stringify(err)));
-        wrap.style.display = 'none';
-        console.error(err);
-      }
-    });
-
-    // -------------------------
-    //  REVEAL & CONTENT
-    // -------------------------
-    // Hedef: bugün Europe/Istanbul saatine göre 21:10
-    (function(){
-      const tz = 'Europe/Istanbul';
-      const now = new Date();
-      // Istanbul local date components based on Intl
-      const parts = new Intl.DateTimeFormat('en-GB', {
-        timeZone: tz,
-        year: 'numeric', month: 'numeric', day: 'numeric',
-        hour: 'numeric', minute: 'numeric', second: 'numeric',
-        hour12: false
-      }).formatToParts(now).reduce((acc, p) => {
-        if (p.type !== 'literal') acc[p.type] = p.value;
-        return acc;
-      }, {});
-      // Build Istanbul date string for today at 21:10:00
-      const istYear = parts.year;
-      const istMonth = parts.month.padStart(2,'0');
-      const istDay = parts.day.padStart(2,'0');
-      const istDateTimeStr = `${istYear}-${istMonth}-${istDay}T21:10:00`;
-      // Parse as if in Istanbul by creating a Date from the same components in UTC,
-      // then convert using the timezone offset difference.
-      // Create Date object for the intended wall-clock time in Istanbul:
-      const [y,m,d,h,mm,s] = istDateTimeStr.split(/[-T:]/).map(Number);
-      // Create a Date object in UTC that corresponds to the same Y-M-D H:M:S in the target tz.
-      // To get the correct epoch ms for that local time in tz, use Date.toLocaleString trick:
-      const asUTCString = new Date(Date.UTC(y, m-1, d, h, mm, s)).toLocaleString('en-US', { timeZone: tz });
-      const localEquivalent = new Date(asUTCString);
-      // Compute the epoch ms for the intended Istanbul wall time by adjusting difference
-      // between the wall-clock and the UTC equivalent.
-      const targetDate = (function(){
-        const desired = { year:y, month:m, day:d, hour:h, minute:mm, second:s };
-        const start = Date.UTC(y, m-1, d, h, mm, s) - 12*3600*1000;
-        for (let off = 0; off <= 24*3600*1000; off += 1000) {
-          const candidate = new Date(start + off);
-          const candParts = new Intl.DateTimeFormat('en-GB', {
-            timeZone: tz,
-            year: 'numeric', month: 'numeric', day: 'numeric',
-            hour: 'numeric', minute: 'numeric', second: 'numeric',
-            hour12: false
-          }).formatToParts(candidate).reduce((acc, p) => {
-            if (p.type !== 'literal') acc[p.type] = p.value;
-            return acc;
-          }, {});
-          if (Number(candParts.year) === desired.year &&
-              Number(candParts.month) === desired.month &&
-              Number(candParts.day) === desired.day &&
-              Number(candParts.hour) === desired.hour &&
-              Number(candParts.minute) === desired.minute) {
-            return candidate.getTime();
-          }
-        }
-        return new Date(y, m-1, d, h, mm, s).getTime();
-      })();
-
-      window.__TARGET_DATE_MS = targetDate;
-    })();
-    const targetDate = window.__TARGET_DATE_MS;
-
-    let isReveal = false;
-
-    function updateTimer() {
-      const now = new Date().getTime(), rem = targetDate - now;
-      const isTest = new URLSearchParams(window.location.search).get('test') === 'true';
-
-      if (rem <= 0 || isTest) {
-        if (!isReveal) {
-          isReveal = true;
-          document.getElementById('countdown-section').style.display = 'none';
-          document.getElementById('gallery-section').style.display = 'block';
-          document.querySelector('h1').innerHTML = "10-H<br>Hatıra Duvarı";
-          try{ confetti({ particleCount: 300, spread: 160, origin: { y: 0.5 } }); }catch(e){}
-          initGallery();
-        }
-        return;
-      }
-
-      const d = Math.floor(rem / (1000 * 60 * 60 * 24));
-      const h = Math.floor((rem % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const m = Math.floor((rem % (1000 * 60 * 60)) / (1000 * 60));
-      const s = Math.floor((rem % (1000 * 60)) / 1000);
-
-      document.getElementById('days').innerText = String(d).padStart(2, '0');
-      document.getElementById('hours').innerText = String(h).padStart(2, '0');
-      document.getElementById('minutes').innerText = String(m).padStart(2, '0');
-      document.getElementById('seconds').innerText = String(s).padStart(2, '0');
-    }
-
-    async function initGallery() {
-      try {
-        const { data, error } = await supabase
-          .from('10h_memories')
-          .select('*')
-          .order('date', { ascending: false });
-
-        if (error) throw error;
-        renderGallery(data || []);
-
-        try {
-          supabase.channel('public:10h_memories')
-            .on('postgres_changes', { event: '*', schema: 'public', table: '10h_memories' }, payload => {
-              (async () => {
-                const { data: newData } = await supabase.from('10h_memories').select('*').order('date', { ascending: false });
-                renderGallery(newData || []);
-                loadContributors();
-              })();
-            })
-            .subscribe();
-        } catch (e) {
-          console.warn('Realtime subscribe failed', e);
-        }
-
-      } catch (err) {
-        console.error('Gallery init error', err);
-      }
-    }
-
-    function renderGallery(list) {
-      document.getElementById('gallery').innerHTML = (list || []).map(m => `
-        <div class="card" onclick="openLightbox('${m.photo}', '${m.name}', '${(m.note||'').replace(/'/g, \"\\\\'\")}')">
-          <img src="${m.photo}" class="card-img" loading="lazy">
-          <div class="card-info">
-            <div class="card-name">${m.name}</div>
-            <div class="card-note">"${m.note || 'Sessiz bir anı...'}"</div>
+      <!-- SIDEBAR -->
+      <aside>
+        <div class="sidebar-card fade-up delay-2">
+          <div class="section-label">Katılımcılar <span id="contributor-count" style="color:var(--rust)">0</span></div>
+          <div id="contributor-section">
+            <div id="contributor-list">
+              <p class="sidebar-info" style="font-style:italic;font-size:13px">Henüz anı eklenmemiş. İlk sen ol ✨</p>
+            </div>
           </div>
         </div>
-      `).join('');
+
+        <div class="sidebar-card fade-up delay-3">
+          <div class="section-label">Bilgi</div>
+          <p class="sidebar-info">
+            Anılar bu cihazda saklanır.<br><br>
+            Belirlenen saate kadar galeri kilitli kalır.
+          </p>
+        </div>
+      </aside>
+    </div>
+
+    <!-- GALLERY -->
+    <section id="gallery-section" style="display:none">
+      <hr class="divider">
+      <div class="section-label">Galeri</div>
+      <h2 class="section-title">Hepimizin Anıları</h2>
+      <div id="gallery" class="gallery"></div>
+    </section>
+  </div>
+
+  <footer>
+    <span class="footer-text">10-H · Hatıra Duvarı · 2026</span>
+    <div class="footer-dot"></div>
+    <span class="footer-text">Hazır</span>
+  </footer>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="closeLightbox()">
+  <div class="lightbox-inner" onclick="event.stopPropagation()">
+    <img id="lightImg" src="" alt="" />
+    <div class="lightbox-body">
+      <div>
+        <div id="lightName"></div>
+        <div id="lightNote"></div>
+      </div>
+      <button class="btn btn-fill" onclick="closeLightbox()">Kapat</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  // ── SUPABASE ─────────────────────────────────────────
+  const { createClient } = supabase;
+  const sb = createClient(
+    'https://zyewinfmqhdwrooypyhp.supabase.co',
+    'sb_publishable_-YUOT2rrpDWBk7K272KjkA_2plfNODm'
+  );
+
+  // ── AUTH ─────────────────────────────────────────────
+  const VALID_USERS = { "egm1141": "1141", "omer": "1311", "10h": "2026" };
+
+  function login(user, pass) {
+    const u = user.toLowerCase().trim();
+    if (VALID_USERS[u] === pass) {
+      localStorage.setItem('10h_session', u);
+      showApp(u);
+    } else {
+      document.getElementById('lError').style.display = 'block';
     }
+  }
 
-    async function loadContributors() {
-      try {
-        const { data, error } = await supabase.from('10h_memories').select('name');
-        if (error) throw error;
-        const names = [...new Set((data || []).map(d => d.name))];
-        renderContributors(names);
-      } catch (err) {
-        console.error(err);
-      }
-    }
+  function logout() {
+    localStorage.removeItem('10h_session');
+    location.reload();
+  }
 
-    function renderContributors(names) {
-      const container = document.getElementById('contributor-list');
-      const countEl = document.getElementById('contributor-count');
-      const section = document.getElementById('contributor-section');
-
-      section.style.display = 'block';
-      countEl.innerText = names.length;
-
-      if (!names.length) {
-        container.innerHTML = `<p style="font-size:13px; color:var(--muted); font-style:italic; margin-top:10px;">Henüz anı kilitlenmemiş. İlk sen ol! ✨</p>`;
-        return;
-      }
-
-      container.innerHTML = names.map((n, i) => `<div class="contributor-tag" style="animation-delay: ${i * 0.1}s">✅ ${n}</div>`).join('');
-    }
-
-    setInterval(updateTimer, 1000);
-    updateTimer();
+  function showApp(name) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('main-app').style.display = 'block';
+    document.getElementById('mName').value = name.charAt(0).toUpperCase() + name.slice(1);
     loadContributors();
+  }
 
-    window.openLightbox = (img, name, note) => {
-      document.getElementById('lightImg').src = img;
-      document.getElementById('lightName').innerText = name;
-      document.getElementById('lightNote').innerText = note || "Lise hayatına dair ufak bir hatıra.";
-      document.getElementById('lightbox').style.display = 'flex';
-    };
-    window.closeLightbox = () => { document.getElementById('lightbox').style.display = 'none'; };
+  const savedSession = localStorage.getItem('10h_session');
+  if (savedSession) showApp(savedSession);
 
-  </script>
+  document.getElementById('loginForm').addEventListener('submit', e => {
+    e.preventDefault();
+    login(document.getElementById('lUser').value, document.getElementById('lPass').value);
+  });
+
+  // ── FILE PICK ────────────────────────────────────────
+  document.getElementById('mFile').addEventListener('change', e => {
+    const name = e.target.files[0]?.name;
+    document.getElementById('fileLabelText').innerText = name ? `✅ ${name}` : 'Fotoğraf seç veya sürükle';
+  });
+
+  // ── MEMORY FORM SUBMIT ───────────────────────────────
+  document.getElementById('memoryForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const file = document.getElementById('mFile').files[0];
+    const name = document.getElementById('mName').value.trim();
+    const note = document.getElementById('mNote').value.trim();
+    if (!file || !name) return;
+
+    const wrap = document.getElementById('progWrap');
+    const fill = document.getElementById('progFill');
+    const txt  = document.getElementById('progText');
+    wrap.style.display = 'block';
+    fill.style.width = '20%';
+    txt.innerText = 'Yükleniyor…';
+
+    try {
+      // 1. Storage'a yükle
+      const ext      = file.name.split('.').pop();
+      const filePath = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+
+      const { error: upErr } = await sb.storage
+        .from('10h')
+        .upload(filePath, file, { cacheControl: '3600', upsert: false });
+      if (upErr) throw upErr;
+
+      fill.style.width = '65%';
+      txt.innerText = 'Kaydediliyor…';
+
+      // 2. Public URL al
+      const { data: pubData } = sb.storage.from('10h').getPublicUrl(filePath);
+      const photoUrl = pubData.publicUrl;
+
+      // 3. DB'ye kaydet
+      const { error: insErr } = await sb
+        .from('10h_memories')
+        .insert([{ name, note, photo: photoUrl, date: new Date().toISOString() }]);
+      if (insErr) throw insErr;
+
+      fill.style.width = '100%';
+      txt.innerText = 'Tamamlandı!';
+
+      try { confetti({ particleCount: 160, spread: 80, origin: { y: 0.55 } }); } catch(_) {}
+      alert('ANIN KASAYA EKLENDİ! 🔒');
+
+      document.getElementById('memoryForm').reset();
+      document.getElementById('fileLabelText').innerText = 'Fotoğraf seç veya sürükle';
+      setTimeout(() => { wrap.style.display = 'none'; }, 600);
+
+      loadContributors();
+      if (isReveal) loadAndRenderGallery();
+
+    } catch (err) {
+      alert('Hata: ' + (err.message || JSON.stringify(err)));
+      wrap.style.display = 'none';
+      console.error(err);
+    }
+  });
+
+  // ── TARGET DATE (Istanbul 21:10) ─────────────────────
+  (function(){
+    const tz = 'Europe/Istanbul';
+    const now = new Date();
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: tz, year:'numeric', month:'numeric', day:'numeric',
+      hour:'numeric', minute:'numeric', second:'numeric', hour12: false
+    }).formatToParts(now).reduce((a, p) => { if (p.type !== 'literal') a[p.type] = p.value; return a; }, {});
+    const y = Number(parts.year), mo = Number(parts.month), d = Number(parts.day), h = 21, mm = 35;
+    const start = Date.UTC(y, mo-1, d, h, mm, 0) - 12*3600*1000;
+    for (let off = 0; off <= 24*3600*1000; off += 1000) {
+      const c = new Date(start + off);
+      const cp = new Intl.DateTimeFormat('en-GB', {
+        timeZone: tz, year:'numeric', month:'numeric', day:'numeric',
+        hour:'numeric', minute:'numeric', second:'numeric', hour12: false
+      }).formatToParts(c).reduce((a, p) => { if (p.type !== 'literal') a[p.type] = p.value; return a; }, {});
+      if (Number(cp.year)===y && Number(cp.month)===mo && Number(cp.day)===d &&
+          Number(cp.hour)===h && Number(cp.minute)===mm) {
+        window.__TARGET_DATE_MS = c.getTime(); break;
+      }
+    }
+    if (!window.__TARGET_DATE_MS) window.__TARGET_DATE_MS = new Date(y, mo-1, d, h, mm, 0).getTime();
+  })();
+
+  const targetDate = window.__TARGET_DATE_MS;
+  let isReveal = false;
+
+  function updateTimer() {
+    const rem = targetDate - Date.now();
+    const isTest = new URLSearchParams(location.search).get('test') === 'true';
+    if (rem <= 0 || isTest) {
+      if (!isReveal) {
+        isReveal = true;
+        document.getElementById('countdown-section').style.display = 'none';
+        document.getElementById('gallery-section').style.display = 'block';
+        try { confetti({ particleCount: 300, spread: 160, origin: { y: 0.5 } }); } catch(_) {}
+        loadAndRenderGallery();
+        // Realtime subscription
+        sb.channel('10h_memories_channel')
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: '10h_memories' }, () => {
+            loadAndRenderGallery();
+            loadContributors();
+          })
+          .subscribe();
+      }
+      return;
+    }
+    const dd = Math.floor(rem / (1000*60*60*24));
+    const hh = Math.floor((rem % (1000*60*60*24)) / (1000*60*60));
+    const mm2 = Math.floor((rem % (1000*60*60)) / (1000*60));
+    const ss = Math.floor((rem % (1000*60)) / 1000);
+    document.getElementById('days').innerText    = String(dd).padStart(2,'0');
+    document.getElementById('hours').innerText   = String(hh).padStart(2,'0');
+    document.getElementById('minutes').innerText = String(mm2).padStart(2,'0');
+    document.getElementById('seconds').innerText = String(ss).padStart(2,'0');
+  }
+
+  // ── GALLERY ──────────────────────────────────────────
+  async function loadAndRenderGallery() {
+    const { data, error } = await sb
+      .from('10h_memories')
+      .select('*')
+      .order('date', { ascending: false });
+    if (error) { console.error(error); return; }
+    renderGallery(data || []);
+  }
+
+  let galleryData = [];
+
+  function renderGallery(list) {
+    galleryData = list;
+    const el = document.getElementById('gallery');
+    if (!list.length) {
+      el.innerHTML = `<p style="color:var(--muted);font-style:italic;font-size:15px">Henüz hiç anı eklenmemiş.</p>`;
+      return;
+    }
+    el.innerHTML = list.map((m, i) => `
+      <div class="memory-card" style="animation:fadeUp 0.4s ${i*0.06}s both" onclick="openLightbox(${i})">
+        <img src="${m.photo}" loading="lazy" />
+        <div class="memory-card-body">
+          <div class="memory-name">${escHtml(m.name)}</div>
+          <div class="memory-note">"${escHtml(m.note || 'Sessiz bir hatıra…')}"</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── CONTRIBUTORS ─────────────────────────────────────
+  async function loadContributors() {
+    const { data, error } = await sb.from('10h_memories').select('name');
+    const names = [...new Set((data || []).map(d => d.name))];
+    document.getElementById('contributor-count').innerText = names.length;
+    const container = document.getElementById('contributor-list');
+    if (!names.length) {
+      container.innerHTML = `<p class="sidebar-info" style="font-style:italic;font-size:13px">Henüz anı eklenmemiş. İlk sen ol ✨</p>`;
+      return;
+    }
+    container.innerHTML = names.map(n => `<span class="contributor-tag">✅ ${escHtml(n)}</span>`).join('');
+  }
+
+  // ── LIGHTBOX ─────────────────────────────────────────
+  function openLightbox(i) {
+    const m = galleryData[i];
+    if (!m) return;
+    document.getElementById('lightImg').src = m.photo;
+    document.getElementById('lightName').innerText = m.name;
+    document.getElementById('lightNote').innerText = m.note || 'Lise hayatına dair ufak bir hatıra.';
+    document.getElementById('lightbox').style.display = 'flex';
+  }
+  window.openLightbox = openLightbox;
+  window.closeLightbox = () => { document.getElementById('lightbox').style.display = 'none'; };
+
+  // ── UTILS ────────────────────────────────────────────
+  function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  // ── INIT ─────────────────────────────────────────────
+  setInterval(updateTimer, 1000);
+  updateTimer();
+</script>
 </body>
 </html>
